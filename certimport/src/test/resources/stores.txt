@@ -1,0 +1,7 @@
+trustempty
+- prazdny, obsahuje len jeden defaultny privatny kluc (alias mykey), inak som ho nevedel vytvorit
+- vsetky hesla su "trusted"
+
+fbtrust
+- certifikat pre https://www.facebook.com/
+- heslo je "trusted"
