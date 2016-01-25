@@ -40,7 +40,7 @@ public class StoreCertificateChainHandler implements TrustedHandler {
 					String foundAlias = this.trustStore.getCertificateAlias(cert);
 					if (foundAlias != null) {
 						result.setMatchingAlias(foundAlias);
-						result.setMatchingCertificat(cert);
+						result.setMatchingCertificate(cert);
 					}
 				} catch (KeyStoreException e) {
 					throw new CertimportException("Key store problem!", e);
@@ -73,6 +73,7 @@ public class StoreCertificateChainHandler implements TrustedHandler {
 		}
 		
 		result.setCertificatesAdded(addedCerts);
+		result.setServerCertChain(chain);
 		this.lastResult = result;
 	}
 	
