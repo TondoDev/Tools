@@ -104,22 +104,7 @@ public class TrustedConnectionManager {
 		try {
 			this.trustStore = KeyStore.getInstance("jks");
 			trustStore.load(intput, password);
-			TrustManagerFactory managerFactory = TrustManagerFactory.getInstance("PKIX");
-			managerFactory.init(trustStore);
-			TrustManager[] managers = managerFactory.getTrustManagers();
-			
-			// intercepting original X509 trust manager for possibility to inject our code here
-			for (int i = 0; i < managers.length; i++) {
-				if (managers[i] instanceof X509TrustManager) {
-					this.interceptor = new InterceptingX509Manager((X509TrustManager)managers[i]); 
-					managers[i] = this.interceptor;
-				}
-			}
-			
-			SSLContext context = SSLContext.getInstance("SSL");
-			context.init(null, managers, null);
-			this.socketFactory = context.getSocketFactory();
-			
+			reloadContext(trustStore);
 		} catch (Exception e) {
 			throw new CertimportException("Trust Connection Manager can't be instantiated!", e);
 		}
