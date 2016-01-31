@@ -2,6 +2,7 @@ package org.tondo.certimport;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Inet4Address;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.KeyManagementException;
@@ -10,6 +11,8 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
@@ -148,15 +151,34 @@ public class TrustedConnectionManager {
 		StoreCertificateChainHandler handler = new StoreCertificateChainHandler(conf, trustStore);
 		this.interceptor.setTrustedHandler(handler);
 		
-		// establish connection
-		HttpsURLConnection conn = (HttpsURLConnection) location.openConnection();
-		conn.setSSLSocketFactory(socketFactory);
-		// cause SSL handshage
-		conn.connect();
+		HostResult hostAddress = new HostParser().parserHost(location);
+		SSLSession session = null;
+		// works only with IPv4??
+		try (SSLSocket socket = (SSLSocket) this.socketFactory.createSocket( 
+				Inet4Address.getByName(hostAddress.getHost()), hostAddress.getPort())) {
+			socket.startHandshake();
+			session = socket.getSession();
+		}
 		
-		// reset handler
-		this.interceptor.setTrustedHandler(null);
 		CertStoreResult result = handler.getResult();
+		// handshake doesn't occurred because of ssl session
+		// so invalidate session and try again
+		if (result == null) {
+			session.invalidate();
+			try (SSLSocket socket = (SSLSocket) this.socketFactory.createSocket( 
+					Inet4Address.getByName(hostAddress.getHost()), hostAddress.getPort())) {
+				socket.startHandshake();
+			}
+			
+			result = handler.getResult();
+		}
+		this.interceptor.setTrustedHandler(null);
+		
+		// if also second attempt  fails
+		if (result == null) {
+			throw new CertimportException("Can't initiate SSL handshake!");
+		}
+		
 		if (result.getCertificatesAdded() > 0) {
 			reloadContext(this.trustStore);
 		}

@@ -94,14 +94,13 @@ public class TrustConnectionTest extends StandardTestBase{
 		fbConn = emptyManager.getConnection(fburl);
 		checkReadabilityFromConnection(fbConn);
 		
-		// TODO this won't work because  connecting to same site multiple times shares SSL session
-		// need to be solved somehow
-		// once again try add same certificate
+
 		result = emptyManager.addRootCertificate(fburl, "fb2");
 		// because default behavior is add even if exist
-		assertEquals("One certificate should be added even if exists", 1, result.getCertificatesAdded());
+		assertEquals("No certificate should be added because default setting is not overwrite", 0, result.getCertificatesAdded());
 		assertNotNull("Match in trustore was found", result.getMatchingCertificate());
-		assertEquals("Matched shoudl be root certificate", result.getMatchingCertificate(), result.getServerCertChain()[0]);
+		assertEquals("Matching alias should be this we added in previous step", "facebook", result.getMatchingAlias());
+		assertEquals("Matched shoudl be root certificate", result.getMatchingCertificate(), result.getServerCertChain()[result.getServerCertChain().length - 1]);
 	}
 	
 	@Test
