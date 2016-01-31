@@ -42,13 +42,17 @@ public class HostParserTest {
 		assertEquals("host is extract as IP address", "192.168.1.1", ipResult.getHost());
 		assertEquals("Default http port is used", 80, ipResult.getPort());
 		
-		// bad IP address
-		HostResult badIpResult = parser.parserHost(new URL("http://192.168.1000.1/hallo/world/?nice.html"));
-		assertNotNull("Host result cant't be null".equals(badIpResult));
-		// TODO who is responsible for this?
-		assertEquals("Parser doesnt check validity of IP address", "192.168.1000.1", badIpResult.getHost());
-		assertEquals("Default http port is used", 80, badIpResult.getPort());
+		// similar to IP but not iP is considered as valid hostname
+		HostResult ipSimilarResult = parser.parserHost(new URL("http://192.168.10.1.1/hallo/world/?nice.html"));
+		assertNotNull("Host result cant't be null".equals(ipSimilarResult));
+		assertEquals("Parser cosiders this as valid hostname", "192.168.10.1.1", ipSimilarResult.getHost());
+		assertEquals("Default http port is used", 80, ipSimilarResult.getPort());
 		
+		try {
+			parser.parserHost(new URL("http://192.256.10.1/hallo/world/?nice.html"));
+			fail("HostParserException expected because ip address component is out of range");
+		} catch (HostParserException e) {}
+ 		
 		//unknown protocol is handled by URL class
 		try {
 			parser.parserHost(new URL("bla://www.faceboo.com/"));

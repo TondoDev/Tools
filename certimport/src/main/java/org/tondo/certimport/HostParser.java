@@ -32,6 +32,7 @@ public class HostParser {
 	 */
 	public HostResult parserHost(URL location) {
 		String host = location.getHost();
+		checkHostName(host);
 		int port = location.getPort();
 		
 		// not provided explicitly
@@ -44,5 +45,38 @@ public class HostParser {
 		}
 		
 		return new HostResult(host, port);
+	}
+	
+	/**
+	 * Check if hostname looks like IP address and then validate number ranges.
+	 * In RFC is something written about that Top Level Domain must be alphabetic, but this algo
+	 * so is much simplified. If hostname contains four gorups of digits separated by dot, then is considered
+	 * as IP address and check against range.
+	 * 
+	 * @param hostName
+	 * 	hostname to check
+	 */
+	private void checkHostName(String hostName) {
+		String[] parts = hostName.split("\\.");
+		
+		if (parts.length != 4) {
+			return;
+		}
+		
+		int[] ipParts = new int[4];
+		for (int i = 0; i < parts.length; i++) {
+			try {
+				ipParts[i] = Integer.parseInt(parts[i]);
+			} catch (NumberFormatException e) {
+				// not number -> not IP -> valid
+				return;
+			}
+		}
+		
+		for (int i = 0; i < parts.length; i++) {
+			if(ipParts[i] < 0 || ipParts[i] > 255) {
+				throw new HostParserException(hostName + " is considered as IP address with bad format!");
+			}
+		}
 	}
 }
