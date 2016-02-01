@@ -50,7 +50,7 @@ public class StoreCertificateChainHandler implements TrustedHandler {
 		}
 		int addedCerts = 0;
 		// store only if cert is not already trusted or if it is forced
-		if (!(alreadyTrustred && configuration.isOnlyIfMissing())) {
+		if (!alreadyTrustred || configuration.isAddEvenIfTrusted()) {
 			
 			if (configuration.getOption() == CertStoringOption.CHAIN) {
 				

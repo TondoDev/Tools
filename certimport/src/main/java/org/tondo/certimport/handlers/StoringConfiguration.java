@@ -6,7 +6,7 @@ public class StoringConfiguration {
 
 	public static class ConfBuilder {
 		private String alias = null;
-		private boolean onlyIfMissing = false;
+		private boolean addEvenIfTrustedFlag = false;
 		private CertStoringOption option;
 		
 		
@@ -15,8 +15,8 @@ public class StoringConfiguration {
 			return this;
 		}
 		
-		public ConfBuilder setOnlyIfMissing(boolean onlyIfMissing) {
-			this.onlyIfMissing = onlyIfMissing;
+		public ConfBuilder setAddEvenIfTrusted(boolean flag) {
+			this.addEvenIfTrustedFlag = flag;
 			return this;
 		}
 		
@@ -30,7 +30,7 @@ public class StoringConfiguration {
 			validate();
 			StoringConfiguration sc = new StoringConfiguration();
 			sc.setAlias(alias);
-			sc.setOnlyIfMissing(onlyIfMissing);
+			sc.setAddEvenIfTrusted(addEvenIfTrustedFlag);
 			sc.setOption(option);
 			return sc;
 		}
@@ -53,7 +53,7 @@ public class StoringConfiguration {
 	
 	private CertStoringOption option;
 	private String alias;
-	private boolean onlyIfMissing = false;
+	private boolean addEvenIfTrusted = false;
 	
 	public String getAlias() {
 		return alias;
@@ -63,12 +63,12 @@ public class StoringConfiguration {
 		this.alias = alias;
 	}
 	
-	public boolean isOnlyIfMissing() {
-		return onlyIfMissing;
+	public boolean isAddEvenIfTrusted() {
+		return addEvenIfTrusted;
 	}
 	
-	private void setOnlyIfMissing(boolean onlyIfMissing) {
-		this.onlyIfMissing = onlyIfMissing;
+	private void setAddEvenIfTrusted(boolean flag) {
+		this.addEvenIfTrusted = flag;
 	}
 	
 	public CertStoringOption getOption() {

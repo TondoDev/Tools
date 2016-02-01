@@ -129,7 +129,7 @@ public class TrustedConnectionManager {
 		StoringConfiguration conf = StoringConfiguration
 			.builder()
 				.setAlias(alias)
-				.setOnlyIfMissing(true)
+				.setAddEvenIfTrusted(false)
 				.setOption(CertStoringOption.ROOT)
 			.create();
 		
@@ -140,7 +140,7 @@ public class TrustedConnectionManager {
 		StoringConfiguration conf = StoringConfiguration
 			.builder()
 				.setAlias(alias)
-				.setOnlyIfMissing(true)
+				.setAddEvenIfTrusted(false)
 				.setOption(CertStoringOption.LEAF)
 			.create();
 		
