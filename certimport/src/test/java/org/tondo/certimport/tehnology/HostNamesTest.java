@@ -11,7 +11,7 @@ import java.net.UnknownHostException;
 import org.junit.Test;
 
 /**
- * Experiments how URL and ssl sockets can handle parsing hostanmes
+ * Experiments how URL and ssl sockets can handle parsing hostnames
  * 
  * @author TondoDev
  *
@@ -52,7 +52,7 @@ public class HostNamesTest {
 		// DNS lookup occurs
 		assertEquals("hostname", "www.facebook.com", address.getHostName());
 		
-		// not existint location
+		// not existing location
 		// not sure why but can be created and some unknown address is returneds
 		InetAddress invalid = Inet4Address.getByName("www.guwerergugop.sk");
 		assertNotNull(invalid);

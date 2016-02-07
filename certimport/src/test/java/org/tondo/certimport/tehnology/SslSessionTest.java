@@ -22,7 +22,14 @@ import org.junit.Test;
 import org.tondo.testutils.StandardTestBase;
 
 /**
- * SSL framework tests to better understand technology
+ * SSL framework tests to better understand technology. This test is focused on SSL session.
+ * When connections to same host are created from same SSL context, SSL handshake is occurred only
+ * at the beginning of first connection, because all connection to same host share same SSL session.
+ * 
+ * SSL session can be invalidated using {@code invalidate()} call. Next SSL connection will be assigned to new
+ * SSL session and handshake will be made again. Active connections in invalidated session will work normally, till
+ * connection is closed.
+ * 
  * @author TondoDev
  *
  */
@@ -80,7 +87,7 @@ public class SslSessionTest extends StandardTestBase {
 		
 		con = createConnection(ytUrl);
 		con.connect();
-		assertEquals("Seccond session is also shared - no handshage", 2, handler.getHandshakeCount());
+		assertEquals("Seccond session is also shared - no handshake", 2, handler.getHandshakeCount());
 		con.disconnect();
 		
 		// once again try first connection if session was forgotten or not

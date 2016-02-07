@@ -24,6 +24,15 @@ import org.tondo.certimport.handlers.StoringConfiguration;
 import org.tondo.certimport.managers.AllTrustManager;
 import org.tondo.certimport.managers.InterceptingX509Manager;
 
+/**
+ * TrustConnectionManager is used for querying trust state of SSL locations and adding
+ * sites certificate to trustore. This manager initialize internal SSL context with
+ * trust managers loaded from provided KeyStore. Changes to internal state of trustore is not
+ * reflected directly in file, but are only kept in memory while exlicit save is invoked (TODO).
+ * 
+ * @author TondoDev
+ *
+ */
 public class TrustedConnectionManager {
 	
 	/** Socket factory initialized by provided truststore */
@@ -35,6 +44,7 @@ public class TrustedConnectionManager {
 	/** Tool for plug our custom certificate chain handler*/
 	private InterceptingX509Manager interceptor;
 	
+	/** internal sockect factory for creating socket which trust all target locations */
 	private static final SSLSocketFactory reliantSocketFactory;
 	
 	static {
@@ -124,7 +134,21 @@ public class TrustedConnectionManager {
 		return getConnection(location, this.socketFactory);
 	}
 	
-	
+	/**
+	 * Add root certificate of ssl location from provided certificate chain. Root certificate
+	 * is usually self signed. Trusting root certificate means also trusting all other certificates
+	 * which are signed by root. If site is already trusted, new certificate is not added again.
+	 * For different behavior use {@link #addCertificate(URL, StoringConfiguration)} with requested configuration.
+	 * 
+	 * @param location
+	 * 	url location of ssl site
+	 * @param alias
+	 * 	used for storing this certificate in trustore. If same alias is found in trusted certificate
+	 * 	section, it is overwritten, but if same alias exists in other section (for example secret key) exception is thrown.
+	 * @return
+	 * 	returns summary about adding process
+	 * @throws IOException
+	 */
 	public CertStoreResult addRootCertificate(URL location, String alias) throws IOException {
 		StoringConfiguration conf = StoringConfiguration
 			.builder()
@@ -136,6 +160,22 @@ public class TrustedConnectionManager {
 		return addCertificate(location, conf);
 	}
 	
+	/**
+	 * Add lef certificate of ssl location from provided certificate chain.
+	 * Leaf certificate belongs to specific organization or site which is issued by some of
+	 * higher level CA. 
+	 * If site is already trusted, new certificate is not added again.
+	 * For different behavior use {@link #addCertificate(URL, StoringConfiguration)} with requested configuration.
+	 * 
+	 * @param location
+	 * 	url location of ssl site
+	 * @param alias
+	 * 	used for storing this certificate in trustore. If same alias is found in trusted certificate
+	 * 	section, it is overwritten, but if same alias exists in other section (for example secret key) exception is thrown.
+	 * @return
+	 * 	returns summary about adding process
+	 * @throws IOException
+	 */
 	public CertStoreResult addLeafCertificate(URL location, String alias) throws IOException {
 		StoringConfiguration conf = StoringConfiguration
 			.builder()
@@ -147,6 +187,18 @@ public class TrustedConnectionManager {
 		return addCertificate(location, conf);
 	}
 	
+	/**
+	 * Add certificate of provided https location to trustore. Added certificate is not persisted but
+	 * it is keep in context of this trust manager.
+	 * @param location
+	 * 	location of site which certificate we want to add
+	 * @param conf
+	 * 	settings for adding process. With this settings can be configured alias, or forced add if certificate is already trusted etc. See
+	 * 	{@link StoringConfiguration}} for more details
+	 * @return
+	 * 	result summary about adding process.
+	 * @throws IOException
+	 */
 	public CertStoreResult addCertificate(URL location, StoringConfiguration conf) throws IOException {
 		StoreCertificateChainHandler handler = new StoreCertificateChainHandler(conf, trustStore);
 		this.interceptor.setTrustedHandler(handler);
@@ -186,6 +238,12 @@ public class TrustedConnectionManager {
 		return result;
 	}
 	
+	/**
+	 * Reload internal SSL context with provided keystore.
+	 * Context is initialized only with trustManagers, random generator and key managers are set as null.
+	 * @param store
+	 * 	keystore containing trusted certificates
+	 */
 	private void reloadContext(KeyStore store) {
 		try {
 			TrustManagerFactory managerFactory = TrustManagerFactory.getInstance("PKIX");
