@@ -49,17 +49,18 @@ public class StoreCertificateChainHandler implements TrustedHandler {
 			}
 		}
 		int addedCerts = 0;
-		// store only if cert is not already trusted or if it is forced
-		if (!alreadyTrustred || configuration.isAddEvenIfTrusted()) {
+		CertStoringOption option = configuration.getOption();
+		// store only if cert is not already trusted or if it is forced and is enabled by configuration
+		if (option != CertStoringOption.DONT_ADD && (!alreadyTrustred || configuration.isAddEvenIfTrusted())) {
 			
-			if (configuration.getOption() == CertStoringOption.CHAIN) {
+			if (option == CertStoringOption.CHAIN) {
 				
 			} else {
 				X509Certificate certToStore = null;
-				if (configuration.getOption() == CertStoringOption.ROOT) {
+				if (option == CertStoringOption.ROOT) {
 					// TODO can server send 0 certificates?
 					certToStore = chain[chain.length - 1];
-				} else if (configuration.getOption() == CertStoringOption.LEAF) {
+				} else if (option == CertStoringOption.LEAF) {
 					certToStore = chain[0];
 				}
 				

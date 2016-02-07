@@ -190,4 +190,31 @@ public class TrustConnectionTest extends StandardTestBase{
 		assertTrue("Contains facebook somewhere", result.getMatchingCertificate().getSubjectDN().getName().contains("facebook"));
 		
 	}
+	
+	@Test
+	public void testChekIfTrusted() throws FileNotFoundException, IOException {
+		TrustedConnectionManager emptyManager = null;
+		try (InputStream input = new FileInputStream(this.inResourceDir("trustempty").toString())) {
+			emptyManager = new TrustedConnectionManager(input, "trusted".toCharArray());
+		}
+		URL fburl = new URL("https://www.facebook.com");
+		CertStoreResult result = emptyManager.checkIfTrusted(fburl);
+		// not trusted so far
+		assertNull("When not trusted alias is null", result.getMatchingAlias());
+		assertNull("When not trusted matching certificate is null", result.getMatchingCertificate());
+		assertEquals("Nothing was added", 0, result.getCertificatesAdded());
+		
+		// now we add certificate
+		CertStoreResult storingResult = emptyManager.addLeafCertificate(fburl, "fbcert");
+		assertEquals("One certificate was added", 1, storingResult.getCertificatesAdded());
+		
+		// no check if trusted again
+		CertStoreResult matchingResult = emptyManager.checkIfTrusted(fburl);
+		assertEquals("Nothing was added, its only predicate", 0, matchingResult.getCertificatesAdded());
+		assertEquals("Found matched alias", "fbcert", matchingResult.getMatchingAlias());
+		assertEquals("Match was on leaf certificate added in previous step", 
+					storingResult.getServerCertChain()[0], 
+					matchingResult.getMatchingCertificate());
+	}
 }
+

@@ -36,7 +36,7 @@ public class StoringConfiguration {
 		}
 		
 		private void validate() {
-			if (alias == null) {
+			if (option != CertStoringOption.DONT_ADD && alias == null) {
 				throw new IllegalArgumentException("So far till alias handler not exists, is alias field mandatory");
 			}
 			

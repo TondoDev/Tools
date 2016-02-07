@@ -239,6 +239,27 @@ public class TrustedConnectionManager {
 	}
 	
 	/**
+	 * Check if given location is trusted by this trust connection manager (or underlying trustore).
+	 * Trust internal state of trust mananger is not modified by this call.
+	 * @param location
+	 * 	location of site to investigate
+	 * @return
+	 * 	summary about verification process. If site is trusted then {@link CertStoreResult#getMatchingAlias()} and {@link CertStoreResult#getMatchingCertificate()}
+	 *  returns corresponding values which entry in trustore make this location as trusted. It both these values are null (should never happend
+	 *  that one value is null and one not),
+	 *  site is not trusted
+	 * @throws IOException 
+	 */
+	public CertStoreResult checkIfTrusted(URL location) throws IOException {
+		StoringConfiguration conf = StoringConfiguration
+				.builder()
+					.setOption(CertStoringOption.DONT_ADD)
+				.create();
+			
+		return addCertificate(location, conf);
+	}
+	
+	/**
 	 * Reload internal SSL context with provided keystore.
 	 * Context is initialized only with trustManagers, random generator and key managers are set as null.
 	 * @param store
