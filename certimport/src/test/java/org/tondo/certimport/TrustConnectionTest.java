@@ -153,4 +153,41 @@ public class TrustConnectionTest extends StandardTestBase{
 			fail("SSLHandshakeException expected, because alias entry was overridden");
 		} catch (SSLHandshakeException e) {}
 	}
+	
+	@Test
+	public void testAddLeafCertificate() throws FileNotFoundException, IOException {
+		TrustedConnectionManager emptyManager = null;
+		try (InputStream input = new FileInputStream(this.inResourceDir("trustempty").toString())) {
+			emptyManager = new TrustedConnectionManager(input, "trusted".toCharArray());
+		}
+		
+		URL fburl = new URL("https://www.facebook.com");
+		
+		URLConnection fbConn = emptyManager.getConnection(fburl);
+		// trustsore is empty so it should fail with handshake
+		try {
+			checkReadabilityFromConnection(fbConn);
+			fail("Expected exception");
+		} catch (SSLHandshakeException e) {}
+		
+		CertStoreResult result = emptyManager.addLeafCertificate(fburl, "facebook");
+		assertEquals("One certificate should be added", 1, result.getCertificatesAdded());
+		assertNull("Cetificat was untrusted before", result.getMatchingCertificate());
+		assertNull("Cetificat was untrusted before so alias is also null", result.getMatchingAlias());
+		
+		// this should work
+		fbConn = emptyManager.getConnection(fburl);
+		checkReadabilityFromConnection(fbConn);
+		
+		// try adding again
+		result = emptyManager.addLeafCertificate(fburl, "facebook");
+		assertEquals("Default is not add even if exists so nothing is added", 0, result.getCertificatesAdded());
+		assertNotNull("Found already matching certificate", result.getMatchingCertificate());
+		// added used alias in previous step
+		assertEquals("Found already matching certificate alias", "facebook", result.getMatchingAlias());
+		// matched certificate should be first in server cert chain because we are adding leaf
+		assertEquals("Matching certificate is leaf", result.getServerCertChain()[0], result.getMatchingCertificate());
+		assertTrue("Contains facebook somewhere", result.getMatchingCertificate().getSubjectDN().getName().contains("facebook"));
+		
+	}
 }
