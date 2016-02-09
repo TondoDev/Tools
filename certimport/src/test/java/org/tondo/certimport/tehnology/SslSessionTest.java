@@ -9,6 +9,8 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -37,20 +39,27 @@ public class SslSessionTest extends StandardTestBase {
 	
 	private static class ExperimentalTrustManager implements X509TrustManager {
 		private int handshakeCount = 0;
+		private List<String> callOrder = new ArrayList<>();
 
 		@Override
 		public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-			
+			callOrder.add("checkClientTrusted");
 		}
 
 		@Override
 		public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+			callOrder.add("checkServerTrusted");
 			handshakeCount++;
 		}
 
 		@Override
 		public X509Certificate[] getAcceptedIssuers() {
+			callOrder.add("getAcceptedIssuers");
 			return null;
+		}
+		
+		public List<String> getCallOrder() {
+			return callOrder;
 		}
 		
 		public int getHandshakeCount() {
@@ -166,6 +175,21 @@ public class SslSessionTest extends StandardTestBase {
 			assertEquals("sharing previous session created after invalidation - no handshake", 2, handler.getHandshakeCount());
 		
 		}
+	}
+	
+	@Test
+	public void testClietnSideTrustMethods() throws KeyManagementException, NoSuchAlgorithmException, UnknownHostException, IOException {
+		ExperimentalTrustManager handler = new ExperimentalTrustManager();
+		initContext(handler);
+		
+		try (SSLSocket fbSocket = (SSLSocket) this.socketFactory.createSocket("www.facebook.com", 443)) {
+			fbSocket.startHandshake();
+		}
+		
+		assertEquals("Some methods called", handler.getCallOrder().size(), 2);
+		assertEquals("First is called checkServerTrusted", "checkServerTrusted", handler.getCallOrder().get(0));
+		assertEquals("Second is called getAcceptedIssuers", "getAcceptedIssuers", handler.getCallOrder().get(1));
+		
 	}
 	
 	
