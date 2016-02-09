@@ -114,8 +114,7 @@ public class DynamicTrustoreSwitchingTest extends StandardTestBase{
 	public void testSSLContextInitialization() throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 		// encapsulated loading trust managers from trusstore
 		Path trustoreFile = getFileKeeper().copyResource(Paths.get("fbtrust"));
-		TrustStoreLoader loader = new TrustStoreLoader();
-		TrustManager[] managers  = loader.getTrustManagers(trustoreFile.toFile(), "trusted");
+		TrustManager[] managers  = CertImportTestUtils.getTrustManagers(trustoreFile.toFile(), "trusted");
 		assertEquals(1, managers.length);
 		
 		// on my system SSL is not default
@@ -172,9 +171,8 @@ public class DynamicTrustoreSwitchingTest extends StandardTestBase{
 	
 	private HttpsURLConnection enchrichConnectionByTrustContext(HttpsURLConnection conn, File trustFile, String pwd) 
 			throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException {
-		TrustStoreLoader loader = new TrustStoreLoader();
 		SSLContext context = SSLContext.getInstance("SSL");
-		context.init(null, loader.getTrustManagers(trustFile, pwd), null);
+		context.init(null, CertImportTestUtils.getTrustManagers(trustFile, pwd), null);
 		conn.setSSLSocketFactory(context.getSocketFactory());
 		return conn;
 	}
