@@ -177,6 +177,7 @@ public class SslSessionTest extends StandardTestBase {
 		}
 	}
 	
+	
 	@Test
 	public void testClietnSideTrustMethods() throws KeyManagementException, NoSuchAlgorithmException, UnknownHostException, IOException {
 		ExperimentalTrustManager handler = new ExperimentalTrustManager();
@@ -188,6 +189,7 @@ public class SslSessionTest extends StandardTestBase {
 		
 		assertEquals("Some methods called", handler.getCallOrder().size(), 2);
 		assertEquals("First is called checkServerTrusted", "checkServerTrusted", handler.getCallOrder().get(0));
+		// OK - thismethods is relevent only for serve side when requiring client authentication
 		assertEquals("Second is called getAcceptedIssuers", "getAcceptedIssuers", handler.getCallOrder().get(1));
 		
 	}
