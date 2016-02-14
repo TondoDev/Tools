@@ -44,7 +44,7 @@ public class StoringConfiguration {
 			} else if (this.aliasAlgorithm != null) {
 				sc.setAliasCreator(this.aliasAlgorithm);
 			} else {
-				// defauult
+				sc.setAliasCreator(new DnAliasCreator());
 			}
 			
 			return sc;
@@ -102,7 +102,4 @@ public class StoringConfiguration {
 	private void setAliasCreator(AliasCreator aliasCreator) {
 		this.aliasCreator = aliasCreator;
 	}
-	
-	
-	
 }
