@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.security.cert.X509Certificate;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLException;
@@ -16,6 +17,8 @@ import javax.net.ssl.SSLHandshakeException;
 
 import org.junit.Test;
 import org.tondo.certimport.handlers.CertStoreResult;
+import org.tondo.certimport.handlers.DnAliasCreator;
+import org.tondo.certimport.handlers.StoringConfiguration;
 import org.tondo.testutils.StandardTestBase;
 
 /**
@@ -215,6 +218,36 @@ public class TrustConnectionTest extends StandardTestBase{
 		assertEquals("Match was on leaf certificate added in previous step", 
 					storingResult.getServerCertChain()[0], 
 					matchingResult.getMatchingCertificate());
+	}
+	
+	@Test
+	public void testStoreWholeChain() throws FileNotFoundException, IOException {
+		TrustedConnectionManager emptyManager = null;
+		try (InputStream input = new FileInputStream(this.inResourceDir("trustempty").toString())) {
+			emptyManager = new TrustedConnectionManager(input, "trusted".toCharArray());
+		}
+		URL fburl = new URL("https://www.facebook.com");
+		StoringConfiguration conf = StoringConfiguration.builder()
+				.setOption(CertStoringOption.CHAIN)
+			.create();
+		
+		assertTrue("Default alias creator is DN", conf.getAliasCreator() instanceof DnAliasCreator);
+		assertEquals("Default store if trusted", false, conf.isAddEvenIfTrusted());
+		
+		CertStoreResult result = emptyManager.addCertificate(fburl, conf);
+		assertEquals("Added certs should be equal to whole chain sent by server", result.getServerCertChain().length, result.getCertificatesAdded());
+		
+		CertStoreResult checkResult = emptyManager.checkIfTrusted(fburl);
+		// checking is done from root to leaf?
+		int chainLen = checkResult.getServerCertChain().length;
+		assertEquals("Matching last in chain (root)", 
+				checkResult.getMatchingCertificate(), 
+				checkResult.getServerCertChain()[chainLen - 1]);
+		
+		DnAliasCreator aliasCreator = new DnAliasCreator();
+		assertEquals("Alias was by default generated from DN", 
+				aliasCreator.createAlias((X509Certificate)checkResult.getServerCertChain()[chainLen -1]),
+				checkResult.getMatchingAlias());
 	}
 }
 

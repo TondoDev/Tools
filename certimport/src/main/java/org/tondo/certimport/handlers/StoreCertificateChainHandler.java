@@ -4,6 +4,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 
 import javax.net.ssl.X509TrustManager;
 
@@ -48,33 +49,35 @@ public class StoreCertificateChainHandler implements TrustedHandler {
 				
 			}
 		}
-		int addedCerts = 0;
+		int addedCertsCount = 0;
 		CertStoringOption option = configuration.getOption();
 		// store only if cert is not already trusted or if it is forced and is enabled by configuration
 		if (option != CertStoringOption.DONT_ADD && (!alreadyTrustred || configuration.isAddEvenIfTrusted())) {
 			
+			X509Certificate[] certsToStore = null;
 			if (option == CertStoringOption.CHAIN) {
-				
+				certsToStore = Arrays.copyOf(chain, chain.length);
 			} else {
-				X509Certificate certToStore = null;
 				if (option == CertStoringOption.ROOT) {
 					// TODO can server send 0 certificates?
-					certToStore = chain[chain.length - 1];
+					certsToStore = new X509Certificate[] {chain[chain.length - 1]};
 				} else if (option == CertStoringOption.LEAF) {
-					certToStore = chain[0];
+					certsToStore =  new X509Certificate[] {chain[0]};
 				}
-				
-				try {
-					String newCertAlias = configuration.getAliasCreator().createAlias(certToStore);
-					trustStore.setCertificateEntry(newCertAlias, certToStore);
-					addedCerts++;
-				} catch (KeyStoreException e) {
-					throw new CertimportException("Key store problem!", e);
+			}
+			
+			try {
+				for (X509Certificate cert : certsToStore) {
+					String newCertAlias = configuration.getAliasCreator().createAlias(cert);
+					trustStore.setCertificateEntry(newCertAlias, cert);
+					addedCertsCount++;
 				}
+			} catch (KeyStoreException e) {
+				throw new CertimportException("Key store problem!", e);
 			}
 		}
 		
-		result.setCertificatesAdded(addedCerts);
+		result.setCertificatesAdded(addedCertsCount);
 		result.setServerCertChain(chain);
 		this.lastResult = result;
 	}

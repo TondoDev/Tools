@@ -51,12 +51,8 @@ public class StoringConfiguration {
 		}
 		
 		private void validate() {
-			if (option != CertStoringOption.DONT_ADD && alias == null) {
-				throw new IllegalArgumentException("So far till alias handler not exists, is alias field mandatory");
-			}
-			
-			if (option == null || option == CertStoringOption.CHAIN) {
-				throw new IllegalArgumentException("CHAIN or null option is not supported so far!");
+			if (option == null) {
+				throw new IllegalArgumentException("Storing option not specified!");
 			}
 		}
 	}
