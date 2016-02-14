@@ -65,7 +65,8 @@ public class StoreCertificateChainHandler implements TrustedHandler {
 				}
 				
 				try {
-					trustStore.setCertificateEntry(configuration.getAlias(), certToStore);
+					String newCertAlias = configuration.getAliasCreator().createAlias(certToStore);
+					trustStore.setCertificateEntry(newCertAlias, certToStore);
 					addedCerts++;
 				} catch (KeyStoreException e) {
 					throw new CertimportException("Key store problem!", e);

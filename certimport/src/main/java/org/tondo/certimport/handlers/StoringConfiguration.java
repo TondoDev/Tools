@@ -8,6 +8,7 @@ public class StoringConfiguration {
 		private String alias = null;
 		private boolean addEvenIfTrustedFlag = false;
 		private CertStoringOption option;
+		private AliasCreator aliasAlgorithm;
 		
 		
 		public ConfBuilder setAlias(String alias) {
@@ -25,6 +26,11 @@ public class StoringConfiguration {
 			return this;
 		}
 		
+		public ConfBuilder setAliasCreator(AliasCreator creator) {
+			this.aliasAlgorithm = creator;
+			return this;
+		}
+		
 		
 		public StoringConfiguration create() {
 			validate();
@@ -32,6 +38,15 @@ public class StoringConfiguration {
 			sc.setAlias(alias);
 			sc.setAddEvenIfTrusted(addEvenIfTrustedFlag);
 			sc.setOption(option);
+			
+			if (this.alias != null && (option != CertStoringOption.CHAIN)) {
+				sc.setAliasCreator(new ConstantAliasCreator(alias));
+			} else if (this.aliasAlgorithm != null) {
+				sc.setAliasCreator(this.aliasAlgorithm);
+			} else {
+				// defauult
+			}
+			
 			return sc;
 		}
 		
@@ -54,6 +69,7 @@ public class StoringConfiguration {
 	private CertStoringOption option;
 	private String alias;
 	private boolean addEvenIfTrusted = false;
+	private AliasCreator aliasCreator;
 	
 	public String getAlias() {
 		return alias;
@@ -78,5 +94,15 @@ public class StoringConfiguration {
 	private void setOption(CertStoringOption option) {
 		this.option = option;
 	}
+	
+	public AliasCreator getAliasCreator() {
+		return aliasCreator;
+	}
+	
+	private void setAliasCreator(AliasCreator aliasCreator) {
+		this.aliasCreator = aliasCreator;
+	}
+	
+	
 	
 }
