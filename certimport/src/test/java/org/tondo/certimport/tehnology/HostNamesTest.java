@@ -54,9 +54,10 @@ public class HostNamesTest {
 		
 		// not existing location
 		// not sure why but can be created and some unknown address is returneds
-		InetAddress invalid = Inet4Address.getByName("www.guwerergugop.sk");
-		assertNotNull(invalid);
-		//System.out.println(invalid);
+		try {
+			InetAddress invalid = Inet4Address.getByName("www.guwerergugop.sk");
+			fail("UnknownHostException expected!");
+		} catch (UnknownHostException e) {}
 		
 		// from string ip
 		InetAddress fromIp = Inet4Address.getByName("31.13.93.36");
