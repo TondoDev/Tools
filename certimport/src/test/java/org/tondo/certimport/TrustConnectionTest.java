@@ -249,5 +249,24 @@ public class TrustConnectionTest extends StandardTestBase{
 				aliasCreator.createAlias((X509Certificate)checkResult.getServerCertChain()[chainLen -1]),
 				checkResult.getMatchingAlias());
 	}
+	
+	/**
+	 * Demo of initialization of TrustConnectionManager with null as InputStream parameter for 
+	 * truststore
+	 * @throws IOException 
+	 */
+	@Test
+	public void testInitializedWithNull() throws IOException {
+		TrustedConnectionManager manager = new TrustedConnectionManager(null, null);
+		URL fburl = new URL("https://www.facebook.com");
+		CertStoreResult checkResult = manager.checkIfTrusted(fburl);
+		assertNull("empty trust store trust nothing", checkResult.getMatchingAlias());
+		
+		CertStoreResult addResult = manager.addRootCertificate(fburl, "facebook");
+		assertEquals("One certificate should be added", 1, addResult.getCertificatesAdded());
+		
+		CertStoreResult recheckResult = manager.checkIfTrusted(fburl);
+		assertEquals("facebook", recheckResult.getMatchingAlias());
+	}
 }
 

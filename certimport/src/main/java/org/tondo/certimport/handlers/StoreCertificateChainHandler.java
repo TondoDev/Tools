@@ -1,5 +1,6 @@
 package org.tondo.certimport.handlers;
 
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.CertificateException;
@@ -18,8 +19,8 @@ public class StoreCertificateChainHandler implements TrustedHandler {
 	
 	private CertStoreResult lastResult;
 	
-	public StoreCertificateChainHandler(StoringConfiguration conf, KeyStore truststores) {
-		this.trustStore = truststores;
+	public StoreCertificateChainHandler(StoringConfiguration conf, KeyStore truststore) {
+		this.trustStore = truststore;
 		this.configuration = conf;
 	}
 
@@ -32,6 +33,13 @@ public class StoreCertificateChainHandler implements TrustedHandler {
 			original.checkServerTrusted(chain, authType);
 		} catch (CertificateException e) {
 			alreadyTrustred = false;
+		} catch (RuntimeException e) {
+			// this can happen when trustore is empty without any entry.
+			if (e.getCause() instanceof InvalidAlgorithmParameterException) {
+				alreadyTrustred = false;
+			} else {
+				throw new CertimportException("Error occured during server certificate check!", e);
+			}
 		}
 		
 		CertStoreResult result = new CertStoreResult();
