@@ -2,12 +2,15 @@ package org.tondo.certimport;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Inet4Address;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -257,6 +260,22 @@ public class TrustedConnectionManager {
 				.create();
 			
 		return addCertificate(location, conf);
+	}
+	
+	/**
+	 * Saves trustore used by this trust manager. After this call, all added
+	 * certificates are passed to provided output stream.
+	 * @param output
+	 * 	stream where trustore will be written
+	 * @param pwd
+	 * 	password for check integrity (same as {@link KeyStore#store(OutputStream, char[])}}
+	 */
+	public void save(OutputStream output, char[] pwd){
+		try {
+			this.trustStore.store(output, pwd);
+		} catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
+			throw new CertimportException("Trust store can't be saved!", e);
+		}
 	}
 	
 	/**

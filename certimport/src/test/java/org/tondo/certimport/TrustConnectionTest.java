@@ -5,10 +5,12 @@ import static org.tondo.certimport.CertImportTestUtils.*;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Path;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -267,6 +269,70 @@ public class TrustConnectionTest extends StandardTestBase{
 		
 		CertStoreResult recheckResult = manager.checkIfTrusted(fburl);
 		assertEquals("facebook", recheckResult.getMatchingAlias());
+	}
+	
+	@Test
+	public void testSaveTrustStore() throws FileNotFoundException, IOException {
+		TrustedConnectionManager manager = null;
+		try (InputStream input = new FileInputStream(this.inResourceDir("trustempty").toString())) {
+			manager = new TrustedConnectionManager(input, "trusted".toCharArray());
+		}
+		URL fburl = new URL("https://www.facebook.com");
+		// fb is not trusted initially
+		CertStoreResult checkResult = manager.checkIfTrusted(fburl);
+		assertNull("empty trust store trust nothing", checkResult.getMatchingAlias());
+		
+		// add fb to trustore
+		CertStoreResult addResult = manager.addRootCertificate(fburl, "facebook");
+		assertEquals("One certificate should be added", 1, addResult.getCertificatesAdded());
+		
+		Path fbtrust = this.inTempDir("fbtrust.jks");
+		// file will be deleted after this test
+		getFileKeeper().markForWatch(fbtrust);
+		try (FileOutputStream fos = new FileOutputStream(fbtrust.toFile())) {
+			manager.save(fos, "shrek".toCharArray());
+		}
+		
+		// so now we have new trustore with fb certificate so init
+		// new trust connection manager with that new trustore and fb should be 
+		// trusted
+		TrustedConnectionManager fbManager = null;
+		try (InputStream input = new FileInputStream(fbtrust.toFile())) {
+			fbManager = new TrustedConnectionManager(input, "shrek".toCharArray());
+		}
+		
+		CertStoreResult reloadedResult = fbManager.checkIfTrusted(fburl);
+		assertEquals("From reloaded trustore fb should be trusted", "facebook", reloadedResult.getMatchingAlias());
+		// keytool.exe -list -v -keystore fbtrust.jks
+	}
+	
+	@Test
+	public void testSaveEmptyTrustStore() throws FileNotFoundException, IOException {
+		TrustedConnectionManager manager = new TrustedConnectionManager(null, null);		
+		
+		Path fbtrust = this.inTempDir("fbtrust.jks");
+		// file will be deleted after this test
+		getFileKeeper().markForWatch(fbtrust);
+		try (FileOutputStream fos = new FileOutputStream(fbtrust.toFile())) {
+			manager.save(fos, "shrek".toCharArray());
+		}
+		
+		// keytool.exe -list -v -keystore fbtrust.jks
+		// will reurns
+		// Keystore type: JKS
+		// Keystore provider: SUN
+		//
+		// Your keystore contains 0 entries
+	}
+	
+	@Test
+	public void testSaveWithNull() {
+		TrustedConnectionManager manager = new TrustedConnectionManager(null, null);		
+		try {
+			manager.save(null, "shrek".toCharArray());
+			fail("NullPointerException expected. Risen inside original KeyStore class");
+		} catch (NullPointerException e) {}
+		
 	}
 }
 
