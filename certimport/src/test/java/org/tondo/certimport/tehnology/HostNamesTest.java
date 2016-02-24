@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -46,6 +47,9 @@ public class HostNamesTest {
 	}
 	
 	
+	// ignored because handling of unknown host looks very different according to
+	// network settings
+	@Ignore
 	@Test
 	public void testIpAddressResolving() throws UnknownHostException {
 		InetAddress address = Inet4Address.getByName("www.facebook.com");
