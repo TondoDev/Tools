@@ -2,6 +2,7 @@ package org.tondo.certimport;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -101,17 +102,33 @@ public class Certimport {
 			configBuilder.setOption(CertStoringOption.LEAF);
 		} else if (args.hasOption("c")) {
 			configBuilder.setOption(CertStoringOption.DONT_ADD);
+			resultHandler = new CheckExistenceHandler();
+		} else {
+			// parsing cmd should avoid this branch
+			System.out.println("Unexpected state: Unknown action!");
+			return false;
 		}
 		
 		configBuilder.setAddEvenIfTrusted(args.hasOption('f'));
 		try {
 			CertStoreResult result = manager.addCertificate(new URL(args.getOptionValue("url")), configBuilder.create());
 			resultHandler.printResultInfo(result);
-			return true;
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
 			return false;
 		}
+		
+		// for actions which caused modification of trustore save its new state
+		if (!args.hasOption('c')) {
+			try (FileOutputStream fos = new FileOutputStream(truststorePath)) {
+				manager.save(fos, pwd.toCharArray());
+			} catch (IOException e) {
+				System.err.println(e.getMessage());
+				return false;
+			}
+		}
+		
+		return true;
 	}
 	
 	private TrustedConnectionManager createManager(String path, String pwd, boolean createIfNeeded) {
