@@ -1,5 +1,13 @@
 package org.tondo.certimport;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -8,6 +16,9 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.tondo.certimport.handlers.CertStoreResult;
+import org.tondo.certimport.handlers.StoringConfiguration;
+import org.tondo.certimport.handlers.StoringConfiguration.ConfBuilder;
 
 /**
  * @author TondoDev
@@ -17,7 +28,6 @@ public class Certimport {
 	
 	public static void main(String[] args) {
 		Certimport app = new Certimport();
-		args = new String[] {"-url"};
 		
 		CommandLine parsedArgs = app.parseCmdArgs(args);
 		// syntax error in command line args
@@ -29,7 +39,10 @@ public class Certimport {
 			app.printHelp(null);
 			System.exit(0);
 		}
-	
+		
+		if (!app.validateArgs(parsedArgs) || !app.execute(parsedArgs)) {
+			System.exit(1);
+		}
 	}
 	   
 	private Options functionalOptions;
@@ -59,6 +72,70 @@ public class Certimport {
 		}
 	}
 	
+	private boolean validateArgs(CommandLine args) {
+		
+		return true;
+	}
+	
+	private boolean execute(CommandLine args) {
+		boolean createIfNotExists = false;
+		String truststorePath = args.getOptionValue("t");
+		if (truststorePath == null) {
+			truststorePath = args.getOptionValue("tc");
+			createIfNotExists = true;
+		}
+		String pwd = args.getOptionValue("pw");
+		
+		TrustedConnectionManager manager = createManager(truststorePath, pwd, createIfNotExists);
+		if (manager == null) {
+			return false;
+		}
+		
+		ResultHandler resultHandler = null;
+		ConfBuilder configBuilder = StoringConfiguration.builder();
+		if(args.hasOption("aa")) {
+			configBuilder.setOption(CertStoringOption.CHAIN);
+		} else if (args.hasOption("ar")) {
+			configBuilder.setOption(CertStoringOption.ROOT);
+		} else if (args.hasOption("al")) {
+			configBuilder.setOption(CertStoringOption.LEAF);
+		} else if (args.hasOption("c")) {
+			configBuilder.setOption(CertStoringOption.DONT_ADD);
+		}
+		
+		configBuilder.setAddEvenIfTrusted(args.hasOption('f'));
+		try {
+			CertStoreResult result = manager.addCertificate(new URL(args.getOptionValue("url")), configBuilder.create());
+			resultHandler.printResultInfo(result);
+			return true;
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
+			return false;
+		}
+	}
+	
+	private TrustedConnectionManager createManager(String path, String pwd, boolean createIfNeeded) {
+		if (Files.exists(Paths.get(path))) {
+			try (InputStream truststore = new FileInputStream(path)) {
+				return new TrustedConnectionManager(truststore, pwd.toCharArray());
+			} catch (FileNotFoundException e) {
+				System.err.println(e.getMessage());
+				return null;
+			} catch (IOException e) {
+				System.err.println(e.getMessage());
+				return null;
+			} catch (Exception e) {
+				System.err.println("Unexpected error occured! " + e.getMessage());
+				return null;
+			}
+		} else if (createIfNeeded) {
+			return new TrustedConnectionManager(null, pwd.toCharArray());
+		} else {
+			System.err.println("Truststore file not found. Run with -tc if you want create empty.");
+			return null;
+		}
+	}
+	
 	private void initCmdOptions() {
 		this.infoOptions = new Options()
 				.addOption("h", "print this help");
@@ -74,7 +151,16 @@ public class Certimport {
 				.hasArg()
 				.desc("path to trustore used for authenticate server")
 			.build();
-		this.functionalOptions.addOption(trust);
+		Option trustCreate = Option.builder("tc")
+				.argName("path")
+				.hasArg()
+				.desc("path to trustore used for authenticate server, if not exist file is created")
+			.build();
+		OptionGroup trustGroup = new OptionGroup();
+		trustGroup.setRequired(true);
+		trustGroup.addOption(trust);
+		trustGroup.addOption(trustCreate);
+		this.functionalOptions.addOptionGroup(trustGroup);
 
 		// truststore password
 		Option pwd = Option.builder("pw")
