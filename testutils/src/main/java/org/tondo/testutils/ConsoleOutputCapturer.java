@@ -15,78 +15,112 @@ import java.io.PrintStream;
  */
 public class ConsoleOutputCapturer {
 	
-	// stdout
-	private PrintStream originlaOutput;
-	private ByteArrayOutputStream buffer;
-	private PrintStream capturingStream;
-	
-	// stderr
-	private PrintStream originlaErrOutput;
-	private ByteArrayOutputStream errBuffer;
-	private PrintStream capturingErrStream;
-	
-	public void capture() {
-		if (capturingStream == null) {
-			// store original print stream
-			this.originlaOutput = System.out;
-			this.buffer = new ByteArrayOutputStream();
-			this.capturingStream = new PrintStream(buffer);
-			System.out.flush();
-			System.setOut(capturingStream);
+	private static class CaptureBuffer {
+		private PrintStream originlOutput;
+		private ByteArrayOutputStream buffer;
+		private PrintStream capturingStream;
+		
+		public CaptureBuffer(PrintStream original) {
+			if (original == null) {
+				throw new IllegalArgumentException("Original stream can't be null!");
+			}
+			this.originlOutput = original;
 		}
 		
-		if (capturingErrStream == null) {
-			this.originlaErrOutput = System.err;
-			this.errBuffer = new ByteArrayOutputStream();
-			this.capturingErrStream = new PrintStream(errBuffer);
-			System.err.flush();
-			System.setErr(capturingErrStream);
+		public void init() {
+			this.buffer = new ByteArrayOutputStream();
+			this.capturingStream = new PrintStream(buffer);
+			this.originlOutput.flush();
+		}
+		
+		public void stop() {
+			this.capturingStream.flush();
+			this.capturingStream = null;
+			
+		}
+		
+		public boolean isCapturing() {
+			return this.capturingStream != null;
+		}
+		
+		public PrintStream getStream() {
+			if (this.capturingStream == null) {
+				throw new IllegalStateException("CApturing stream is not initialized!");
+			}
+			
+			return this.capturingStream;
+		}
+		
+		public PrintStream getOriginal() {
+			return this.originlOutput;
+		}
+		
+		public String[] getData() {
+			if (this.capturingStream != null) {
+				this.capturingStream.flush();
+			} else if (this.buffer == null) {
+				return new String[]{};
+			}
+			
+			String capturedData = this.buffer.toString();
+			if (capturedData == null || capturedData.isEmpty()) {
+				return new String[]{};
+			}
+			return capturedData.split(System.getProperty("line.separator"));
+		}
+	}
+	
+//	// stdout
+//	private PrintStream originlOutput;
+//	private ByteArrayOutputStream buffer;
+//	private PrintStream capturingStream;
+//	
+//	// stderr
+//	private PrintStream originlaErrOutput;
+//	private ByteArrayOutputStream errBuffer;
+//	private PrintStream capturingErrStream;
+	
+	private CaptureBuffer stdOutBuffer;
+	private CaptureBuffer stdErrBuffer;
+	
+	public ConsoleOutputCapturer() {
+		this.stdOutBuffer = new CaptureBuffer(System.out);
+		this.stdErrBuffer = new CaptureBuffer(System.err);
+	}
+	
+	public void capture() {
+		if (!stdOutBuffer.isCapturing()) {
+			stdOutBuffer.init();
+			System.setOut(stdOutBuffer.getStream());
+		}
+		
+		if (!stdErrBuffer.isCapturing()) {
+			stdErrBuffer.init();
+			System.setErr(stdErrBuffer.getStream());
 		}
 	}
 	
 	public  void stopCapturing() {
-		if (capturingStream != null) {
-			System.out.flush();
-			System.setOut(originlaOutput);
-			this.capturingStream = null;
+		if (this.stdOutBuffer.isCapturing()) {
+			this.stdOutBuffer.stop();
+			System.setOut(this.stdOutBuffer.getOriginal());
 		}
 		
-		if (capturingErrStream != null) {
-			System.out.flush();
-			System.setErr(originlaErrOutput);
-			this.capturingErrStream = null;
+		if (this.stdErrBuffer.isCapturing()) {
+			this.stdErrBuffer.stop();
+			System.setErr(stdErrBuffer.getOriginal());
 		}
 	}
 	
 	public String[] getLines() {
-		if (this.capturingStream != null) {
-			this.capturingStream.flush();
-		} else if (this.buffer == null) {
-			return new String[]{};
-		}
-		
-		String capturedData = this.buffer.toString();
-		if (capturedData == null || capturedData.isEmpty()) {
-			return new String[]{};
-		}
-		return capturedData.split(System.getProperty("line.separator"));
+		return this.stdOutBuffer.getData();
 	}
 	
 	/**
 	 * Return captured lines from standerd error output
 	 */
 	public String[] getErrLines() {
-		if (this.capturingErrStream != null) {
-			this.capturingErrStream.flush();
-		} else if (this.errBuffer == null) {
-			return new String[]{};
-		}
-		
-		String capturedData = this.errBuffer.toString();
-		if (capturedData == null || capturedData.isEmpty()) {
-			return new String[]{};
-		}
-		return capturedData.split(System.getProperty("line.separator"));
+		return this.stdErrBuffer.getData();
 	}
 
 }

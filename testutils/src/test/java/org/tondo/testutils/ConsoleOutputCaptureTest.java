@@ -2,7 +2,7 @@ package org.tondo.testutils;
 
 import static org.junit.Assert.*;
 
-import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -102,14 +102,10 @@ public class ConsoleOutputCaptureTest {
 		assertArrayEquals(new String[] {"is", "nice"}, capturer.getErrLines());
 	}
 	
-	/**
-	 * Cleanup, even if test crash
-	 */
-	@After
-	public void stopCapture() {
+	@Before
+	public void reset() {
+		capturer.capture();
 		capturer.stopCapturing();
 	}
-	
-
 }
 
