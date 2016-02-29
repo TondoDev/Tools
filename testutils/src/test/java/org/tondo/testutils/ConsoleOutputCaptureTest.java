@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.tondo.testutils.ConsoleOutputCapturer.CapturingOption;
 
 /**
  * 
@@ -89,6 +90,52 @@ public class ConsoleOutputCaptureTest {
 	}
 	
 	@Test
+	public void testPartialCaptureSwitch() {
+		capturer.capture(CapturingOption.STDOUT);
+		System.out.println("First STDOUT");
+		System.err.println("First STDERR");
+		
+		assertArrayEquals("First Stdout captured", new String[] {"First STDOUT"}, capturer.getLines());
+		assertArrayEquals("First Stderr captured", new String[] {}, capturer.getErrLines());
+		
+		capturer.capture(CapturingOption.STDERR);
+		System.out.println("Second STDOUT");
+		System.err.println("Second STDERR");
+		
+		assertArrayEquals("Second Stdout captured", new String[] {"First STDOUT", "Second STDOUT"}, capturer.getLines());
+		assertArrayEquals("Second Stderr captured", new String[] {"Second STDERR"}, capturer.getErrLines());
+		
+		capturer.stopCapturing(CapturingOption.STDOUT);
+		System.out.println("Third STDOUT");
+		System.err.println("Third STDERR");
+		
+		assertArrayEquals("Third Stdout captured", new String[] {"First STDOUT", "Second STDOUT"}, capturer.getLines());
+		assertArrayEquals("Third Stderr captured", new String[] {"Second STDERR", "Third STDERR"}, capturer.getErrLines());
+		
+		capturer.stopCapturing(CapturingOption.STDERR);
+		System.out.println("Fourth STDOUT");
+		System.err.println("Fourth STDERR");
+		// nothing was added
+		assertArrayEquals("Fourth Stdout captured", new String[] {"First STDOUT", "Second STDOUT"}, capturer.getLines());
+		assertArrayEquals("Fourth Stderr captured", new String[] {"Second STDERR", "Third STDERR"}, capturer.getErrLines());
+		
+		capturer.capture(CapturingOption.BOTH);
+		System.out.println("Fifth STDOUT");
+		System.err.println("Fifth STDERR");
+		
+		// Buffers reinitialized
+		assertArrayEquals("Fifth Stdout captured", new String[] {"Fifth STDOUT"}, capturer.getLines());
+		assertArrayEquals("Fifth Stderr captured", new String[] {"Fifth STDERR"}, capturer.getErrLines());
+		
+		capturer.stopCapturing(CapturingOption.STDERR);
+		capturer.capture(CapturingOption.STDERR);
+		System.out.println("Seventh STDOUT");
+		// only stderr was reset
+		assertArrayEquals("Stdout captured", new String[] {"Fifth STDOUT", "Seventh STDOUT"}, capturer.getLines());
+		assertArrayEquals("Stderr captured", new String[] {}, capturer.getErrLines());
+	}
+	
+	@Test
 	public void testCaptureBoth() {
 		capturer.capture();
 		System.out.println("Today");
@@ -106,6 +153,13 @@ public class ConsoleOutputCaptureTest {
 	public void reset() {
 		capturer.capture();
 		capturer.stopCapturing();
+	}
+	
+	@Test
+	public void testSingleton() {
+		LazyLoadSingleton.bulba();
+		LazyLoadSingleton s = LazyLoadSingleton.getInstance();
+		System.out.println("V kode");
 	}
 }
 

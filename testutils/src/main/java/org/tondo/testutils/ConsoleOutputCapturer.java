@@ -14,7 +14,9 @@ import java.io.PrintStream;
  *
  */
 public class ConsoleOutputCapturer {
-	
+	/**
+	 * Encapsulates common functionality for capturing stdout and std err streams.
+	 */
 	private static class CaptureBuffer {
 		private PrintStream originlOutput;
 		private ByteArrayOutputStream buffer;
@@ -70,15 +72,13 @@ public class ConsoleOutputCapturer {
 		}
 	}
 	
-//	// stdout
-//	private PrintStream originlOutput;
-//	private ByteArrayOutputStream buffer;
-//	private PrintStream capturingStream;
-//	
-//	// stderr
-//	private PrintStream originlaErrOutput;
-//	private ByteArrayOutputStream errBuffer;
-//	private PrintStream capturingErrStream;
+	
+	public static enum CapturingOption {
+		STDERR,
+		STDOUT,
+		BOTH
+	}
+	
 	
 	private CaptureBuffer stdOutBuffer;
 	private CaptureBuffer stdErrBuffer;
@@ -89,24 +89,32 @@ public class ConsoleOutputCapturer {
 	}
 	
 	public void capture() {
-		if (!stdOutBuffer.isCapturing()) {
+		capture(CapturingOption.BOTH);
+	}
+	
+	public void capture(CapturingOption option) {
+		if (isOut(option) && !stdOutBuffer.isCapturing()) {
 			stdOutBuffer.init();
 			System.setOut(stdOutBuffer.getStream());
 		}
 		
-		if (!stdErrBuffer.isCapturing()) {
+		if (isErr(option) && !stdErrBuffer.isCapturing()) {
 			stdErrBuffer.init();
 			System.setErr(stdErrBuffer.getStream());
 		}
 	}
 	
-	public  void stopCapturing() {
-		if (this.stdOutBuffer.isCapturing()) {
+	public void stopCapturing() {
+		stopCapturing(CapturingOption.BOTH);
+	}
+	
+	public void stopCapturing(CapturingOption option) {
+		if (isOut(option) && this.stdOutBuffer.isCapturing()) {
 			this.stdOutBuffer.stop();
 			System.setOut(this.stdOutBuffer.getOriginal());
 		}
 		
-		if (this.stdErrBuffer.isCapturing()) {
+		if (isErr(option) && this.stdErrBuffer.isCapturing()) {
 			this.stdErrBuffer.stop();
 			System.setErr(stdErrBuffer.getOriginal());
 		}
@@ -121,6 +129,14 @@ public class ConsoleOutputCapturer {
 	 */
 	public String[] getErrLines() {
 		return this.stdErrBuffer.getData();
+	}
+	
+	private boolean isOut(CapturingOption opt) {
+		return opt == CapturingOption.BOTH || opt == CapturingOption.STDOUT;
+	}
+	
+	private boolean isErr(CapturingOption opt) {
+		return  opt == CapturingOption.BOTH || opt == CapturingOption.STDERR;
 	}
 
 }
