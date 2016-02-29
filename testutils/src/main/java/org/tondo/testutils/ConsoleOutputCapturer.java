@@ -79,11 +79,10 @@ public class ConsoleOutputCapturer {
 		BOTH
 	}
 	
-	
 	private CaptureBuffer stdOutBuffer;
 	private CaptureBuffer stdErrBuffer;
 	
-	public ConsoleOutputCapturer() {
+	private ConsoleOutputCapturer() {
 		this.stdOutBuffer = new CaptureBuffer(System.out);
 		this.stdErrBuffer = new CaptureBuffer(System.err);
 	}
@@ -137,6 +136,15 @@ public class ConsoleOutputCapturer {
 	
 	private boolean isErr(CapturingOption opt) {
 		return  opt == CapturingOption.BOTH || opt == CapturingOption.STDERR;
+	}
+	
+	// this ensures thread safe lazy singleton initialization
+	private static class InstanceHolder {
+		private static final ConsoleOutputCapturer INSTANCE = new ConsoleOutputCapturer();
+	}
+	
+	public static ConsoleOutputCapturer getInstance() {
+		return InstanceHolder.INSTANCE;
 	}
 
 }

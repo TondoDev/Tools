@@ -20,7 +20,7 @@ public class ConsoleOutputCaptureTest {
 	
 	@BeforeClass
 	public static void createCapturer() {
-		capturer = new ConsoleOutputCapturer();
+		capturer = ConsoleOutputCapturer.getInstance();
 	}
 	
 	@Test
@@ -153,13 +153,6 @@ public class ConsoleOutputCaptureTest {
 	public void reset() {
 		capturer.capture();
 		capturer.stopCapturing();
-	}
-	
-	@Test
-	public void testSingleton() {
-		LazyLoadSingleton.bulba();
-		LazyLoadSingleton s = LazyLoadSingleton.getInstance();
-		System.out.println("V kode");
 	}
 }
 
