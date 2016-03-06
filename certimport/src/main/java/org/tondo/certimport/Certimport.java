@@ -29,20 +29,10 @@ public class Certimport {
 	
 	public static void main(String[] args) {
 		Certimport app = new Certimport();
-		
-		CommandLine parsedArgs = app.parseCmdArgs(args);
-		// syntax error in command line args
-		// do nothing - help printed in parsing error handler
-		if (parsedArgs == null) {
+		if (!app.run(args)) {
 			System.exit(1);
-		} else if (parsedArgs.getOptions().length == 0 || parsedArgs.hasOption('h')) {
-			// handling help
-			app.printHelp(null);
+		} else {
 			System.exit(0);
-		}
-		
-		if (!app.validateArgs(parsedArgs) || !app.execute(parsedArgs)) {
-			System.exit(1);
 		}
 	}
 	   
@@ -56,19 +46,35 @@ public class Certimport {
 	}
 	
 	
+	public boolean run(String[] args) {
+		CommandLine parsedArgs = this.parseCmdArgs(args);
+		// syntax error in command line args
+		// do nothing - help printed in parsing error handler
+		if (parsedArgs == null) {
+			return false;
+		} else if (parsedArgs.getOptions().length == 0 || parsedArgs.hasOption('h')) {
+			// handling help
+			this.printHelp(null);
+			return true;
+		}
+		
+		return (!this.validateArgs(parsedArgs) || !this.execute(parsedArgs));
+	}
+	
+	
 	public CommandLine parseCmdArgs(String[] args) {
 		CommandLineParser parser = new DefaultParser();
 		try {
 			// at first parse for help or other information options
 			// it is two step parsing to avoid clash with required functional options
 			CommandLine infoResult = parser.parse(infoOptions, args, true);
-			if (infoResult.getOptions().length > 0) {
+			if (args.length == 0 || infoResult.getOptions().length > 0) {
 				return infoResult;
 			}
 			
 			return parser.parse(functionalOptions, args);
 		} catch (ParseException e) {
-			printHelp("Options parsing error " + e.getMessage());
+			printHelp("Options parsing error: " + e.getMessage());
 			return null;
 		}
 	}
