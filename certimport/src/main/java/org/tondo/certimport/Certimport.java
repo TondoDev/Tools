@@ -58,7 +58,7 @@ public class Certimport {
 			return true;
 		}
 		
-		return (!this.validateArgs(parsedArgs) || !this.execute(parsedArgs));
+		return !this.execute(parsedArgs);
 	}
 	
 	
@@ -72,7 +72,8 @@ public class Certimport {
 				return infoResult;
 			}
 			
-			return parser.parse(functionalOptions, args);
+			CommandLine functionalResult = parser.parse(functionalOptions, args);
+			return validateArgs(functionalResult) ? functionalResult : null;
 		} catch (ParseException e) {
 			printHelp("Options parsing error: " + e.getMessage());
 			return null;
@@ -80,7 +81,10 @@ public class Certimport {
 	}
 	
 	private boolean validateArgs(CommandLine args) {
-		
+		if (args.hasOption('c') && args.hasOption('f')) {
+			System.err.println("Forced options is not aplicable to check operation!");
+			return false;
+		}
 		return true;
 	}
 	
@@ -195,6 +199,7 @@ public class Certimport {
 		// server URL
 		Option url = Option.builder("url")
 				.argName("URL")
+				.required()
 				.desc("https URL of remote server")
 				.hasArg()
 			.build();
