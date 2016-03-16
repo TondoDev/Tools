@@ -211,6 +211,7 @@ public class TrustedConnectionManager {
 		// works only with IPv4??
 		try (SSLSocket socket = (SSLSocket) this.socketFactory.createSocket( 
 				Inet4Address.getByName(hostAddress.getHost()), hostAddress.getPort())) {
+			socket.setSoTimeout(10000);
 			socket.startHandshake();
 			session = socket.getSession();
 		}
