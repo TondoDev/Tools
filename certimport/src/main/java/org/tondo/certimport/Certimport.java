@@ -102,7 +102,7 @@ public class Certimport {
 			return false;
 		}
 		
-		ResultHandler resultHandler = null;
+		ResultHandler resultHandler = new SaveCertHandler();
 		ConfBuilder configBuilder = StoringConfiguration.builder();
 		if(args.hasOption("aa")) {
 			configBuilder.setOption(CertStoringOption.CHAIN);
