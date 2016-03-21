@@ -5,11 +5,30 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 
 public class CertStoreResult {
+	
+	public static class CertificateEntry {
+		private String alias;
+		private X509Certificate certificate;
+		
+		public CertificateEntry(String alias, X509Certificate cert) {
+			this.alias = alias;
+			this.certificate = cert;
+		}
+		
+		public String getAlias() {
+			return alias;
+		}
+		
+		public X509Certificate getCertificate() {
+			return certificate;
+		}
+	}
 
 	private X509Certificate mathchingCert;
 	private String matchingAlias;
-	private int certificatesAdded;
 	private Certificate[] serverCertChain;
+	private CertificateEntry[] addedCertirifcates;
+	private CertificateEntry matchingCertificate;
 	
 	public X509Certificate getMatchingCertificate() {
 		return this.mathchingCert;
@@ -28,11 +47,7 @@ public class CertStoreResult {
 	}
 	
 	public int getCertificatesAdded() {
-		return certificatesAdded;
-	}
-	
-	void setCertificatesAdded(int certificatesAdded) {
-		this.certificatesAdded = certificatesAdded;
+		return this.addedCertirifcates == null ? 0 : this.addedCertirifcates.length;
 	}
 	
 	/**
@@ -47,5 +62,22 @@ public class CertStoreResult {
 	
 	public Certificate[] getServerCertChain() {
 		return serverCertChain;
+	}
+	
+	
+	void setAddedCertificates(CertificateEntry[] certificates) {
+		this.addedCertirifcates = Arrays.copyOf(certificates, certificates.length);
+	}
+	
+	public CertificateEntry[] getAddedCertificates() {
+		return this.addedCertirifcates == null ? new CertificateEntry[] {} : this.addedCertirifcates;
+	}
+	
+	void setMatchingCertificate(CertificateEntry matching) {
+		this.matchingCertificate = matching;
+	}
+	
+	public CertificateEntry getMatchingCertificate2() {
+		return matchingCertificate;
 	}
 }

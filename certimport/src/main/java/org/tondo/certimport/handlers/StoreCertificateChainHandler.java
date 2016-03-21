@@ -5,12 +5,15 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.net.ssl.X509TrustManager;
 
 import org.tondo.certimport.CertStoringOption;
 import org.tondo.certimport.CertimportException;
+import org.tondo.certimport.handlers.CertStoreResult.CertificateEntry;
 
 public class StoreCertificateChainHandler implements TrustedHandler {
 	
@@ -50,6 +53,7 @@ public class StoreCertificateChainHandler implements TrustedHandler {
 					if (foundAlias != null) {
 						result.setMatchingAlias(foundAlias);
 						result.setMatchingCertificate(cert);
+						result.setMatchingCertificate(new CertificateEntry(foundAlias, cert));
 					}
 				} catch (KeyStoreException e) {
 					throw new CertimportException("Key store problem!", e);
@@ -57,7 +61,6 @@ public class StoreCertificateChainHandler implements TrustedHandler {
 				
 			}
 		}
-		int addedCertsCount = 0;
 		CertStoringOption option = configuration.getOption();
 		// store only if cert is not already trusted or if it is forced and is enabled by configuration
 		if (option != CertStoringOption.DONT_ADD && (!alreadyTrustred || configuration.isAddEvenIfTrusted())) {
@@ -75,17 +78,18 @@ public class StoreCertificateChainHandler implements TrustedHandler {
 			}
 			
 			try {
+				List<CertificateEntry> added = new ArrayList<>();
 				for (X509Certificate cert : certsToStore) {
 					String newCertAlias = configuration.getAliasCreator().createAlias(cert);
 					trustStore.setCertificateEntry(newCertAlias, cert);
-					addedCertsCount++;
+					added.add(new CertificateEntry(newCertAlias, cert));
 				}
+				result.setAddedCertificates(added.toArray(new CertificateEntry[added.size()]));
 			} catch (KeyStoreException e) {
 				throw new CertimportException("Key store problem!", e);
 			}
 		}
 		
-		result.setCertificatesAdded(addedCertsCount);
 		result.setServerCertChain(chain);
 		this.lastResult = result;
 	}
