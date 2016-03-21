@@ -51,8 +51,6 @@ public class StoreCertificateChainHandler implements TrustedHandler {
 				try {
 					String foundAlias = this.trustStore.getCertificateAlias(cert);
 					if (foundAlias != null) {
-						result.setMatchingAlias(foundAlias);
-						result.setMatchingCertificate(cert);
 						result.setMatchingCertificate(new CertificateEntry(foundAlias, cert));
 					}
 				} catch (KeyStoreException e) {

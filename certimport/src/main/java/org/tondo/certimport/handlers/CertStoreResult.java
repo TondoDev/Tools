@@ -24,27 +24,9 @@ public class CertStoreResult {
 		}
 	}
 
-	private X509Certificate mathchingCert;
-	private String matchingAlias;
 	private Certificate[] serverCertChain;
 	private CertificateEntry[] addedCertirifcates;
 	private CertificateEntry matchingCertificate;
-	
-	public X509Certificate getMatchingCertificate() {
-		return this.mathchingCert;
-	}
-	
-	void setMatchingCertificate(X509Certificate cert) {
-		this.mathchingCert = cert;
-	}
-	
-	public String getMatchingAlias() {
-		return matchingAlias;
-	}
-	
-	void setMatchingAlias(String matchingAlias) {
-		this.matchingAlias = matchingAlias;
-	}
 	
 	public int getCertificatesAdded() {
 		return this.addedCertirifcates == null ? 0 : this.addedCertirifcates.length;
@@ -77,7 +59,7 @@ public class CertStoreResult {
 		this.matchingCertificate = matching;
 	}
 	
-	public CertificateEntry getMatchingCertificate2() {
+	public CertificateEntry getMatchingCertificate() {
 		return matchingCertificate;
 	}
 }

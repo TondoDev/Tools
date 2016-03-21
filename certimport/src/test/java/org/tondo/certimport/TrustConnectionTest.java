@@ -104,8 +104,8 @@ public class TrustConnectionTest extends StandardTestBase{
 		// because default behavior is add even if exist
 		assertEquals("No certificate should be added because default setting is not overwrite", 0, result.getCertificatesAdded());
 		assertNotNull("Match in trustore was found", result.getMatchingCertificate());
-		assertEquals("Matching alias should be this we added in previous step", "facebook", result.getMatchingAlias());
-		assertEquals("Matched shoudl be root certificate", result.getMatchingCertificate(), result.getServerCertChain()[result.getServerCertChain().length - 1]);
+		assertEquals("Matching alias should be this we added in previous step", "facebook", result.getMatchingCertificate().getAlias());
+		assertEquals("Matched shoudl be root certificate", result.getMatchingCertificate().getCertificate(), result.getServerCertChain()[result.getServerCertChain().length - 1]);
 	}
 	
 	@Test
@@ -128,7 +128,7 @@ public class TrustConnectionTest extends StandardTestBase{
 		// because default behavior is doesn't add if exist
 		assertEquals("One certificate should be added even if exists", 0, result.getCertificatesAdded());
 		assertNotNull("Match in trustore was found", result.getMatchingCertificate());
-		assertEquals("Matched shoudl be root certificate", result.getMatchingCertificate(), 
+		assertEquals("Matched shoudl be root certificate", result.getMatchingCertificate().getCertificate(), 
 				result.getServerCertChain()[result.getServerCertChain().length - 1]);
 	}
 	
@@ -178,7 +178,6 @@ public class TrustConnectionTest extends StandardTestBase{
 		CertStoreResult result = emptyManager.addLeafCertificate(fburl, "facebook");
 		assertEquals("One certificate should be added", 1, result.getCertificatesAdded());
 		assertNull("Cetificat was untrusted before", result.getMatchingCertificate());
-		assertNull("Cetificat was untrusted before so alias is also null", result.getMatchingAlias());
 		
 		// this should work
 		fbConn = emptyManager.getConnection(fburl);
@@ -189,10 +188,10 @@ public class TrustConnectionTest extends StandardTestBase{
 		assertEquals("Default is not add even if exists so nothing is added", 0, result.getCertificatesAdded());
 		assertNotNull("Found already matching certificate", result.getMatchingCertificate());
 		// added used alias in previous step
-		assertEquals("Found already matching certificate alias", "facebook", result.getMatchingAlias());
+		assertEquals("Found already matching certificate alias", "facebook", result.getMatchingCertificate().getAlias());
 		// matched certificate should be first in server cert chain because we are adding leaf
-		assertEquals("Matching certificate is leaf", result.getServerCertChain()[0], result.getMatchingCertificate());
-		assertTrue("Contains facebook somewhere", result.getMatchingCertificate().getSubjectDN().getName().contains("facebook"));
+		assertEquals("Matching certificate is leaf", result.getServerCertChain()[0], result.getMatchingCertificate().getCertificate());
+		assertTrue("Contains facebook somewhere", result.getMatchingCertificate().getCertificate().getSubjectDN().getName().contains("facebook"));
 		
 	}
 	
@@ -205,7 +204,6 @@ public class TrustConnectionTest extends StandardTestBase{
 		URL fburl = new URL("https://www.facebook.com");
 		CertStoreResult result = emptyManager.checkIfTrusted(fburl);
 		// not trusted so far
-		assertNull("When not trusted alias is null", result.getMatchingAlias());
 		assertNull("When not trusted matching certificate is null", result.getMatchingCertificate());
 		assertEquals("Nothing was added", 0, result.getCertificatesAdded());
 		
@@ -216,10 +214,10 @@ public class TrustConnectionTest extends StandardTestBase{
 		// no check if trusted again
 		CertStoreResult matchingResult = emptyManager.checkIfTrusted(fburl);
 		assertEquals("Nothing was added, its only predicate", 0, matchingResult.getCertificatesAdded());
-		assertEquals("Found matched alias", "fbcert", matchingResult.getMatchingAlias());
+		assertEquals("Found matched alias", "fbcert", matchingResult.getMatchingCertificate().getAlias());
 		assertEquals("Match was on leaf certificate added in previous step", 
 					storingResult.getServerCertChain()[0], 
-					matchingResult.getMatchingCertificate());
+					matchingResult.getMatchingCertificate().getCertificate());
 	}
 	
 	@Test
@@ -243,13 +241,13 @@ public class TrustConnectionTest extends StandardTestBase{
 		// checking is done from root to leaf?
 		int chainLen = checkResult.getServerCertChain().length;
 		assertEquals("Matching last in chain (root)", 
-				checkResult.getMatchingCertificate(), 
+				checkResult.getMatchingCertificate().getCertificate(), 
 				checkResult.getServerCertChain()[chainLen - 1]);
 		
 		DnAliasCreator aliasCreator = new DnAliasCreator();
 		assertEquals("Alias was by default generated from DN", 
 				aliasCreator.createAlias((X509Certificate)checkResult.getServerCertChain()[chainLen -1]),
-				checkResult.getMatchingAlias());
+				checkResult.getMatchingCertificate().getAlias());
 	}
 	
 	/**
@@ -262,13 +260,13 @@ public class TrustConnectionTest extends StandardTestBase{
 		TrustedConnectionManager manager = new TrustedConnectionManager(null, null);
 		URL fburl = new URL("https://www.facebook.com");
 		CertStoreResult checkResult = manager.checkIfTrusted(fburl);
-		assertNull("empty trust store trust nothing", checkResult.getMatchingAlias());
+		assertNull("empty trust store trust nothing", checkResult.getMatchingCertificate());
 		
 		CertStoreResult addResult = manager.addRootCertificate(fburl, "facebook");
 		assertEquals("One certificate should be added", 1, addResult.getCertificatesAdded());
 		
 		CertStoreResult recheckResult = manager.checkIfTrusted(fburl);
-		assertEquals("facebook", recheckResult.getMatchingAlias());
+		assertEquals("facebook", recheckResult.getMatchingCertificate().getAlias());
 	}
 	
 	@Test
@@ -280,7 +278,7 @@ public class TrustConnectionTest extends StandardTestBase{
 		URL fburl = new URL("https://www.facebook.com");
 		// fb is not trusted initially
 		CertStoreResult checkResult = manager.checkIfTrusted(fburl);
-		assertNull("empty trust store trust nothing", checkResult.getMatchingAlias());
+		assertNull("empty trust store trust nothing", checkResult.getMatchingCertificate());
 		
 		// add fb to trustore
 		CertStoreResult addResult = manager.addRootCertificate(fburl, "facebook");
@@ -302,7 +300,7 @@ public class TrustConnectionTest extends StandardTestBase{
 		}
 		
 		CertStoreResult reloadedResult = fbManager.checkIfTrusted(fburl);
-		assertEquals("From reloaded trustore fb should be trusted", "facebook", reloadedResult.getMatchingAlias());
+		assertEquals("From reloaded trustore fb should be trusted", "facebook", reloadedResult.getMatchingCertificate().getAlias());
 		// keytool.exe -list -v -keystore fbtrust.jks
 	}
 	

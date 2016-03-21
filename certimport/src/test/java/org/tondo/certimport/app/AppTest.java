@@ -66,8 +66,7 @@ public class AppTest extends StandardTestBase{
 		capturer.stopCapturing();
 		assertArrayEquals("stdout contains negative message", 
 					new String[] {
-							"Trusted: false", 
-							"Alias: "},
+							"Trusted: false"},
 					capturer.getLines());
 		assertArrayEquals("nothing put on stderr", new String[] {}, capturer.getErrLines());
 	}
@@ -111,8 +110,7 @@ public class AppTest extends StandardTestBase{
 		capturer.stopCapturing();
 		assertArrayEquals("Site is not trusted so far", 
 				new String[] {
-						"Trusted: false", 
-						"Alias: "},
+						"Trusted: false"},
 				capturer.getLines());
 		
 		assertArrayEquals("stderr has nothing", 
@@ -175,8 +173,7 @@ public class AppTest extends StandardTestBase{
 		capturer.stopCapturing();
 		assertArrayEquals("Site is not trusted so far", 
 				new String[] {
-						"Trusted: false", 
-						"Alias: "},
+						"Trusted: false"},
 				capturer.getLines());
 		
 		assertArrayEquals("stderr has nothing", 
