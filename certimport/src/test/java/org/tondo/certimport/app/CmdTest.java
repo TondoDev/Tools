@@ -1,9 +1,10 @@
-package org.tondo.certimport;
+package org.tondo.certimport.app;
 
 import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.tondo.certimport.Certimport;
 import org.tondo.testutils.ConsoleOutputCapturer;
 import org.tondo.testutils.StandardTestBase;
 
