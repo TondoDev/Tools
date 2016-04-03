@@ -1,37 +1,27 @@
 package org.tondo.jsonpretty;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.tondo.jsonpretty.prettyfiers.JacksonMemmoryPrettyfier;
+import org.tondo.jsonpretty.prettyfiers.Prettyfier;
 
 /**
  * 
  * @author TondoDev
  *
+ * Class is instantiable because of easier testability.
  */
 public class JsonPretty {
-
 	
-	public static void main(String[] args) {
-		Map<String, Object> data = new HashMap<>();
-		data.put("meno", "Tondo");
-		data.put("vek", 15);
-		String papuca = "{\"meno\":\"Tondo\",\"vek\":15}";
-		List<Map<String,Object>> list = new ArrayList<Map<String,Object>>();
-		list.add(data);
+	
+	public JsonPretty() {
 		
-		ObjectMapper mapper = new ObjectMapper();
-		try {
-			DefaultPrettyPrinter pp = new DefaultPrettyPrinter("");
-			mapper.writer(pp).writeValue(System.out, list);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	}
+	
+	public void prettyPrint(String[] args) {
+		Prettyfier prettyfier = new JacksonMemmoryPrettyfier();
+		prettyfier.prettyfy(System.in, System.out, null);
+	}
+
+	public static void main(String[] args) {
+		new JsonPretty().prettyPrint(args);
 	}
 }
