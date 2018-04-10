@@ -41,7 +41,7 @@ public class Voicerecording {
 	
 	
 	// path of the wav file
-	File wavFile = new File("RecordAudio.wav");
+	File wavFile = new File("outputs/RecordAudio.wav");
 
 	// format of audio file
 	AudioFileFormat.Type fileType = AudioFileFormat.Type.WAVE;
@@ -138,7 +138,7 @@ public class Voicerecording {
 		
 		System.out.println("Second part!");
 		readlineRecording(recorder, enterWait);
-		recorder.save("superfile.wav");
+		recorder.save("outputs/superfile.wav");
 	}
 	
 	public void save(String fileName) {
@@ -153,9 +153,9 @@ public class Voicerecording {
 	}
 	
 	private static void saveInFile() throws IOException {
-		try (FileInputStream fis = new FileInputStream("binarka")) {
+		try (FileInputStream fis = new FileInputStream("outputs/binarka")) {
 			AudioInputStream ais = new AudioInputStream(fis, getAudioFormat(), 200000L);
-			AudioSystem.write(ais, AudioFileFormat.Type.WAVE, new File("slovicko.wav"));
+			AudioSystem.write(ais, AudioFileFormat.Type.WAVE, new File("outputs/slovicko.wav"));
 			ais.close();
 		}
 	}
