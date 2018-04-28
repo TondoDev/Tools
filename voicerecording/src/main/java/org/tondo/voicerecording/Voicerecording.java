@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -15,6 +16,11 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.TargetDataLine;
+
+import org.tondo.voicerecording.adf.AdfEntry;
+import org.tondo.voicerecording.adf.AdfFile;
+import org.tondo.voicerecording.adf.AdfHeader;
+import org.tondo.voicerecording.adf.io.AdfWriter;
 
 public class Voicerecording {
 
@@ -44,7 +50,7 @@ public class Voicerecording {
 	File wavFile = new File("outputs/RecordAudio.wav");
 
 	// format of audio file
-	AudioFileFormat.Type fileType = AudioFileFormat.Type.WAVE;
+	AudioFileFormat.Type fileType = AudioFileFormat.Type.AIFC;
 
 	// the line from which audio data is captured
 	TargetDataLine line;
@@ -92,6 +98,7 @@ public class Voicerecording {
 
 
 			System.out.println("Start recording...");
+			this.outputBuffer.reset();
 			byte[] buffer = new byte[32000];
 			int dataLen;
 			while ((dataLen = ais.read(buffer)) > 0) {
@@ -107,6 +114,14 @@ public class Voicerecording {
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
+	}
+	
+	public byte[] getData() {
+		if (this.outputBuffer == null) {
+			return null;
+		}
+		
+		return this.outputBuffer.toByteArray();
 	}
 
 	/**
@@ -127,18 +142,43 @@ public class Voicerecording {
 		enterWait.readLine();
 		Thread.sleep(200);
 		
-		System.out.println("First part!");
+		AdfEntry entry = new AdfEntry();
+		
+		
+		
+		System.out.println("Source word!");
+		System.out.print("Write: ");
+		String firstWord = enterWait.readLine();
+		entry.setSrcWord(firstWord);
 		readlineRecording(recorder, enterWait);
-		
-		recorder.generateSilence(800);
-		
-		System.out.println("Press enter to begin...");
+		entry.setSrcSoundRaw(recorder.getData());
+				
+		System.out.println("Press enter to begin secodn word...");
 		enterWait.readLine();
-		Thread.sleep(200);
 		
-		System.out.println("Second part!");
+		System.out.print("Write: ");
+		String secondWord = enterWait.readLine();
+		entry.setDestWord(secondWord);
 		readlineRecording(recorder, enterWait);
-		recorder.save("outputs/superfile.wav");
+		entry.setDestSoundRaw(recorder.getData());
+		
+		AdfHeader header = new AdfHeader();
+		header.setAudioFormat(getAudioFormat());
+		header.setSrcLoc("SK");
+		header.setDestLoc("DE");
+		header.setAudioFormatType((short) 0);
+		header.setTextEncoding((short) 0);
+		
+		AdfFile adf = new AdfFile(header);
+		adf.getEntries().add(entry);
+		
+		AdfWriter writer = new AdfWriter();
+		
+		try (FileOutputStream fos = new FileOutputStream("outputs/slovnik.adf")) {
+			writer.write(fos, adf);
+		}
+		
+		//recorder.save("outputs/superfile.wav");
 	}
 	
 	public void save(String fileName) {
