@@ -50,7 +50,7 @@ public class Voicerecording {
 	File wavFile = new File("outputs/RecordAudio.wav");
 
 	// format of audio file
-	AudioFileFormat.Type fileType = AudioFileFormat.Type.AIFC;
+	//AudioFileFormat.Type fileType = AudioFileFormat.Type.AIFC;
 
 	// the line from which audio data is captured
 	TargetDataLine line;

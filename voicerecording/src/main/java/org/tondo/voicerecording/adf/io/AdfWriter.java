@@ -22,17 +22,17 @@ public class AdfWriter {
 		// MAGIC SIGNATURE
 		out.write(toBytes("ADF"));
 		
-		// source localization
-		out.write(toBytes(header.getSrcLoc()));
-		
-		// destination localization
-		out.write(toBytes(header.getDestLoc()));
-		
 		// 0
 		out.write(header.getAudioFormatType());
-		
+				
 		// 0
 		out.write(header.getTextEncoding());
+		
+		// source localization
+		out.write(toLocalizationBytes(header.getSrcLoc()));
+		
+		// destination localization
+		out.write(toLocalizationBytes(header.getDestLoc()));
 		
 		// audio format
 		AudioFormat format = header.getAudioFormat();
@@ -105,5 +105,26 @@ public class AdfWriter {
 			return null;
 		}
 		return str.getBytes(Charset.forName("UTF-8"));
+	}
+	
+	
+	private byte[] toLocalizationBytes(String localization) {
+		if (localization == null || !localization.isEmpty()) {
+			throw new IllegalArgumentException("Localization code is empty!");
+		}
+		
+		if (localization.length() > 3) {
+			throw new IllegalArgumentException("Localization code too long!");
+		}
+		
+		byte[] raw = toBytes(localization);
+		
+		// ensuring length of byte array to have exact size of 3 bytes
+		byte[] ret = new byte[3];
+		for (int i = 0; i < 3 && i < raw.length; i++) {
+			ret[i] = raw[i];
+		}
+		
+		return ret;
 	}
 }

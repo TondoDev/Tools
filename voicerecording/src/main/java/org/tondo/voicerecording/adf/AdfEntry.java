@@ -8,6 +8,16 @@ public class AdfEntry {
 	private byte[] destSoundRaw;
 	
 	
+	public AdfEntry() { }
+	
+	public AdfEntry(String src, byte[] sData, String dest, byte[] dData) {
+		this.srcWord = src;
+		this.srcSoundRaw = sData;
+		this.destWord = dest;
+		this.destSoundRaw = dData;
+	}
+	
+	
 	public String getSrcWord() {
 		return srcWord;
 	}
