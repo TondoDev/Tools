@@ -4,6 +4,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioFormat.Encoding;
@@ -107,9 +108,9 @@ public class AdfWriter {
 		return str.getBytes(Charset.forName("UTF-8"));
 	}
 	
-	
+	// only asci characters allowed
 	private byte[] toLocalizationBytes(String localization) {
-		if (localization == null || !localization.isEmpty()) {
+		if (localization == null || localization.isEmpty()) {
 			throw new IllegalArgumentException("Localization code is empty!");
 		}
 		
@@ -117,7 +118,7 @@ public class AdfWriter {
 			throw new IllegalArgumentException("Localization code too long!");
 		}
 		
-		byte[] raw = toBytes(localization);
+		byte[] raw = localization.getBytes(StandardCharsets.US_ASCII);
 		
 		// ensuring length of byte array to have exact size of 3 bytes
 		byte[] ret = new byte[3];

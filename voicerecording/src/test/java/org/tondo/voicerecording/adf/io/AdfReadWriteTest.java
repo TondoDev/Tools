@@ -11,6 +11,7 @@ import java.util.Arrays;
 import javax.sound.sampled.AudioFormat;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Test;
 import org.tondo.voicerecording.adf.AdfEntry;
 import org.tondo.voicerecording.adf.AdfFile;
@@ -22,12 +23,42 @@ public class AdfReadWriteTest {
 	
 	@Test
 	public void testWriteRead() throws IOException {
-		AdfFile file = prepareAdfStructuree();
+		AdfFile fileIn = prepareAdfStructuree();
 		AdfWriter writer = new AdfWriter();
 		
 		try (FileOutputStream fos = new FileOutputStream(FILE_NAME)) {
-			writer.write(fos, file);
+			writer.write(fos, fileIn);
 		}
+		
+		AdfReader reader = new AdfReader();
+		AdfFile fileOut;
+		try (FileInputStream fis = new FileInputStream(FILE_NAME)) {
+			fileOut = reader.read(fis);
+		}
+		
+		Assert.assertNotNull("Something is read", fileOut);
+		AdfHeader outHeader = fileOut.getHeader();
+		Assert.assertNotNull("Also something is in header", outHeader);
+		
+		AdfHeader inHeader = fileIn.getHeader();
+		Assert.assertEquals("AudioFormatType read correctly", inHeader.getAudioFormatType(), outHeader.getAudioFormatType());
+		Assert.assertEquals("TextEncoding read correctly", inHeader.getTextEncoding(), outHeader.getTextEncoding());
+		Assert.assertEquals("SrcLoc read correctly", inHeader.getSrcLoc(), outHeader.getSrcLoc());
+		Assert.assertEquals("DestLoc read correctly", inHeader.getDestLoc(), outHeader.getDestLoc());
+		
+		AudioFormat inFormat = inHeader.getAudioFormat();
+		AudioFormat outFormat = outHeader.getAudioFormat();
+		Assert.assertNotNull("AudioFormat read", outFormat);
+		
+		Assert.assertEquals("AudioFormat: sampleRate", inFormat.getSampleRate(), outFormat.getSampleRate(), 0.0001);
+		Assert.assertEquals("AudioFormat: frameRate",inFormat.getFrameRate(), outFormat.getFrameRate(), 0.0001);
+		Assert.assertEquals("AudioFormat: channels", inFormat.getChannels(), outFormat.getChannels());
+		Assert.assertEquals("AudioFormat: encoding", inFormat.getEncoding(), outFormat.getEncoding());
+		Assert.assertEquals("AudioFormat: frameSize", inFormat.getFrameSize(), outFormat.getFrameSize());
+		Assert.assertEquals("AudioFormat: sampleSizeInBits", inFormat.getSampleSizeInBits(), outFormat.getSampleSizeInBits());
+		Assert.assertEquals("AudioFormat: bigEndian", inFormat.isBigEndian(), outFormat.isBigEndian());
+		
+		
 	}
 	
 
