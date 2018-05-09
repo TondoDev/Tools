@@ -169,12 +169,66 @@ public class AdfReader {
 			if (input.read(srcText) != srcStrSize) {
 				return -1;
 			}
-			entry.setDestWord(new String(srcText, charset));
+			entry.setSrcWord(new String(srcText, charset));
 		}
 		
 		DataInputStream dataInput = new DataInputStream(input);
+		byte[] srcRaw = readRawAudio(dataInput);
+		if (srcRaw == null) {
+			return -1;
+		}
+		entry.setSrcSoundRaw(srcRaw);
 		
 		
-		return 0;
+		int destStrSize = input.read();
+		if (destStrSize < 0) {
+			return -1;
+		} else if (destStrSize == 0) {
+			entry.setSrcWord(""); 
+		} else {
+			byte[] destText = new byte[destStrSize];
+			if (input.read(destText) != destStrSize) {
+				return -1;
+			}
+			entry.setDestWord(new String(destText, charset));
+		}
+		
+		byte[] destRaw = readRawAudio(dataInput);
+		if (destRaw == null) {
+			return -1;
+		}
+		entry.setDestSoundRaw(destRaw);
+		
+		
+		return 1;
+	}
+	
+	/**
+	 * 
+	 * @param dataInput
+	 * @return a read byte array with size marked before a actual data. null in case of EOF
+	 * @throws IOException
+	 */
+	private byte[] readRawAudio(DataInputStream dataInput) throws IOException {
+		int size;
+		try {
+			size = dataInput.readInt();
+		} catch (EOFException e) {
+			return null;
+		}
+		// quick exit
+		if (size == 0) {
+			return new byte[]{};
+		}
+		
+		byte[] buff = new byte[size];
+		
+		try {
+			dataInput.readFully(buff);
+		} catch (EOFException e) {
+			return null;
+		}
+		
+		return buff;
 	}
 }

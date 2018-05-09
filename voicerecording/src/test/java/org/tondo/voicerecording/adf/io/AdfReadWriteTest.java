@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.sound.sampled.AudioFormat;
 
@@ -57,6 +58,24 @@ public class AdfReadWriteTest {
 		Assert.assertEquals("AudioFormat: frameSize", inFormat.getFrameSize(), outFormat.getFrameSize());
 		Assert.assertEquals("AudioFormat: sampleSizeInBits", inFormat.getSampleSizeInBits(), outFormat.getSampleSizeInBits());
 		Assert.assertEquals("AudioFormat: bigEndian", inFormat.isBigEndian(), outFormat.isBigEndian());
+		
+		List<AdfEntry> inEntries = fileIn.getEntries();
+		List<AdfEntry> outEntries = fileOut.getEntries();
+		
+		Assert.assertNotNull("read entries are not null", outEntries);
+		Assert.assertEquals("size of entries match", inEntries.size(), outEntries.size());
+		
+		for (int i = 0; i < inEntries.size(); i++) {
+			AdfEntry inE = inEntries.get(i);
+			AdfEntry outE = outEntries.get(i);
+			
+			Assert.assertNotNull( i + ". entry is not null.", outE);
+			Assert.assertEquals(i + ". entry srcWord", inE.getSrcWord(), outE.getSrcWord());
+			Assert.assertEquals(i + ". entry destWord", inE.getDestWord(), outE.getDestWord());
+			
+			Assert.assertArrayEquals(i + ". entry src sound data", inE.getSrcSoundRaw(), outE.getSrcSoundRaw());
+			Assert.assertArrayEquals(i + ". entry dest sound data", inE.getDestSoundRaw(), outE.getDestSoundRaw());
+		}
 		
 		
 	}
