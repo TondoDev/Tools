@@ -22,6 +22,8 @@ import org.tondo.voicerecording.adf.AdfFile;
 import org.tondo.voicerecording.adf.AdfHeader;
 import org.tondo.voicerecording.adf.io.AdfWriter;
 
+// FFMPEG: cat slovicko.raw | ./ffmpeg.exe -f s16be -ar 22.1K -ac 2 -i - -f mp3 - > pes.mp3
+
 public class Voicerecording {
 
 	// record duration, in milliseconds
@@ -32,9 +34,9 @@ public class Voicerecording {
 	/**
 	 * Defines an audio format
 	 */
-	static AudioFormat getAudioFormat() {
+	public static AudioFormat getAudioFormat() {
 		if (FORMAT == null) {
-			float sampleRate = 8000;
+			float sampleRate = 22100;
 			int sampleSizeInBits = 16;
 			int channels = 2;
 			boolean signed = true;
