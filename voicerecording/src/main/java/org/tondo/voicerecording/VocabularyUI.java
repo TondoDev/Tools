@@ -12,6 +12,7 @@ import javax.sound.sampled.AudioSystem;
 
 import org.tondo.voicerecording.adf.AdfEntry;
 import org.tondo.voicerecording.audio.AdfStreamer;
+import org.tondo.voicerecording.audio.FfmpegMp3Convertor;
 import org.tondo.voicerecording.audio.SoundPlayer;
 import org.tondo.voicerecording.audio.SoundRecorder;
 
@@ -113,16 +114,7 @@ public class VocabularyUI extends Application {
         Button playAll = new Button("Play all");
         playAll.setOnAction(e -> {
         	
-        	AdfStreamer streamer = new AdfStreamer(Voicerecording.getAudioFormat());
-        	streamer.start()
-        		//.silence(200)
-        		.destination()
-        		.silence(500)
-        		.source()
-        		.silence(500)
-        		.destination()
-        		//.silence(200)
-        	.setEntries(Arrays.asList(this.adfEntry));
+        	AdfStreamer streamer = prepareStream();
         	
         	try {
 				player.play(streamer);
@@ -131,9 +123,18 @@ public class VocabularyUI extends Application {
 			}
         });
         
+        Button convert = new Button("Convert");
+        convert.setOnAction(e -> {
+        	AdfStreamer streamer = prepareStream();
+        	
+        	FfmpegMp3Convertor convertor = new FfmpegMp3Convertor("bin/ffmpeg/bin/ffmpeg.exe");
+        	convertor.convert(streamer, "outputs/ulozene.mp3");
+        	
+        });
+        
 		
         VBox root = new VBox();
-        root.getChildren().addAll( btn, save, play, rbSrc, rbDest, playAll);
+        root.getChildren().addAll( btn, save, play, rbSrc, rbDest, playAll, convert);
         
         primaryStage.setScene(new Scene(root, 100, 150));
         
@@ -156,6 +157,21 @@ public class VocabularyUI extends Application {
 		} else {
 			return this.adfEntry.getDestSoundRaw();
 		}
+	}
+	
+	private AdfStreamer prepareStream() {
+		AdfStreamer streamer = new AdfStreamer(Voicerecording.getAudioFormat());
+    	streamer.start()
+    		//.silence(200)
+    		.destination()
+    		.silence(500)
+    		.source()
+    		.silence(500)
+    		.destination()
+    		//.silence(200)
+    	.setEntries(Arrays.asList(this.adfEntry));
+    	
+    	return streamer;
 	}
 
 }
