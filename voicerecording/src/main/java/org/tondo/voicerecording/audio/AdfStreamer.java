@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.sound.sampled.AudioFormat;
 
@@ -11,22 +13,29 @@ import org.tondo.voicerecording.adf.AdfEntry;
 
 public class AdfStreamer {
 	
-	public static class SequenceBuilder {
+	private static final Pattern SILENCE_PARSER = Pattern.compile("^SIL:([0-9]+)$");
+	
+	public static class Sequence {
 		
-		public SequenceBuilder destination() {
+		private List<String> steps = new ArrayList<>();
+		
+		public Sequence destination() {
+			steps.add("DEST");
 			return this;
 		}
 		
-		public SequenceBuilder source() {
+		public Sequence source() {
+			steps.add("SRC");
 			return this;
 		}
 		
-		public SequenceBuilder silence(int durationInMS) {
+		public Sequence silence(int durationInMS) {
+			steps.add("SIL:"+durationInMS);
 			return this;
 		}
 		
-		private List<String> getSequence() {
-			return null;
+		private List<String> getSteps() {
+			return this.steps;
 		}
 		
 	}
@@ -46,49 +55,16 @@ public class AdfStreamer {
 		return this.format;
 	}
 	
-	public SequenceBuilder createSequenceBuilder() {
-		return new SequenceBuilder();
+	public static Sequence createSequence() {
+		return new Sequence();
 	}
 	
-
-	public AdfStreamer start() {
-		this.commands = new ArrayList<>();
-		this.context = null;
-		this.processedBuffer = null;
-		this.processedBufferOffset = -1;
-		this.commandIter = null;
-		this.entryIter = null;
-		return this;
-	}
-	
-	public AdfStreamer silence(int durationInMs) {
-		commands.add(()->  this.silenceGen.generateSilence(durationInMs));
-		return this;
-	}
-	
-	public AdfStreamer source() {
-		commands.add(() -> {
-			return this.context.getSrcSoundRaw();
-			});
-		return this;
-	}
-	
-	public AdfStreamer destination() {
-		commands.add(() -> {
-			return this.context.getDestSoundRaw();
-			});
-		return this;
-	}
-	
-	public void setEntries(List<AdfEntry> entries) {
-		this.entries = entries;
-		// TODO total bullshit
-		this.entryIter = this.entries.iterator();
-		//this.commandIter = this.commands.iterator();
-	}
-	
-	// TODO
-	public void initPlayback(SequenceBuilder sequence, List<AdfEntry> entries) {
+	/**
+	 * 
+	 * @param sequence if null nothing is streamed
+	 * @param entries
+	 */
+	public void initPlayback(Sequence sequence, List<AdfEntry> entries) {
 		
 		this.context = null;
 		this.processedBuffer = null;
@@ -101,10 +77,32 @@ public class AdfStreamer {
 	}
 	
 	
-	private void prepareCommands(SequenceBuilder sequence) {
+	private void prepareCommands(Sequence sequence) {
 		this.commands = new ArrayList<>();
 		this.commandIter = null;
-		sequence.getSequence();
+		// for null sequence nothing will be streamed
+		if (sequence == null) {
+			return;
+		}
+		
+		for (String code : sequence.getSteps()) {
+			Matcher matcher = SILENCE_PARSER.matcher(code);
+			if (matcher.find()) {
+				int ms = Integer.parseInt(matcher.group(1));
+				commands.add(()->  this.silenceGen.generateSilence(ms));
+			}
+			else if ("DEST".equals(code)) {
+				commands.add(() -> {
+					return this.context.getDestSoundRaw();
+					});
+			} else if ("SRC".equals(code)) {
+				commands.add(() -> {
+					return this.context.getSrcSoundRaw();
+				});
+			} else {
+				throw new IllegalStateException("Unknown sequence \"" + code + "\"");
+			}
+		}
 	}
 	
 	

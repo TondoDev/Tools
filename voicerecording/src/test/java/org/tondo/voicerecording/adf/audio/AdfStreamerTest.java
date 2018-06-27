@@ -12,6 +12,7 @@ import org.tondo.voicerecording.Voicerecording;
 import org.tondo.voicerecording.adf.AdfEntry;
 import org.tondo.voicerecording.audio.AdfStreamer;
 import org.tondo.voicerecording.audio.SilenceGenerator;
+import org.tondo.voicerecording.audio.AdfStreamer.Sequence;
 
 public class AdfStreamerTest {
 	
@@ -31,19 +32,18 @@ public class AdfStreamerTest {
 		AdfStreamer streamer = new AdfStreamer(FORMAT);
 		
 		// nothing from entry used
-		streamer.start()
-			.setEntries(Arrays.asList(entry));
+		streamer.initPlayback(null, Arrays.asList(entry));
 		
 		Assert.assertEquals("immediatelly end of stream", -1, streamer.stream(buff));
-		Assert.assertArrayEquals("buffere remains unchanged", new byte[BUFF_SIZE], buff);
+		Assert.assertArrayEquals("buffer remains unchanged", new byte[BUFF_SIZE], buff);
 		
 		
 		buff = new byte[BUFF_SIZE];
 		// user null soruce and empty destination entry
-		streamer.start()
+		Sequence sequence = AdfStreamer.createSequence()
 			.source()
-			.destination()
-		.setEntries(Arrays.asList(entry));
+			.destination();
+		streamer.initPlayback(sequence, Arrays.asList(entry));
 		
 		Assert.assertEquals("immediatelly end of stream", -1, streamer.stream(buff));
 		Assert.assertArrayEquals("buffere remains unchanged", new byte[BUFF_SIZE], buff);
@@ -66,11 +66,11 @@ public class AdfStreamerTest {
 			Assert.assertTrue("Something got wrong while generating silence", false);
 		}
 		
-		streamer.start()
-			.silence(256)
-			.silence(1000)
-			.setEntries(Arrays.asList(entry));
+		Sequence seqBuilder = AdfStreamer.createSequence()
+				.silence(256)
+				.silence(1000);
 		
+		streamer.initPlayback(seqBuilder, Arrays.asList(entry));
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		
 		int len;
@@ -108,13 +108,13 @@ public class AdfStreamerTest {
 		
 		
 		AdfStreamer streamer = new AdfStreamer(FORMAT);
-		streamer.start()
-			.silence(200)
-			.source()
-			.silence(500)
-			.destination()
-			.destination()
-			.setEntries(Arrays.asList(entry));
+		Sequence sequence = AdfStreamer.createSequence()
+				.silence(200)
+				.source()
+				.silence(500)
+				.destination()
+				.destination();
+		streamer.initPlayback(sequence, Arrays.asList(entry));
 		
 		final int BUFF_SIZE = 2000;
 		byte[] buff = new byte[BUFF_SIZE];
@@ -151,10 +151,10 @@ public class AdfStreamerTest {
 		}
 		
 		AdfStreamer streamer = new AdfStreamer(FORMAT);
-		streamer.start()
-			.source()
-			.destination()
-			.setEntries(Arrays.asList(entry));
+		Sequence sequence = AdfStreamer.createSequence()
+				.source()
+				.destination();
+		streamer.initPlayback(sequence, Arrays.asList(entry));
 		
 		final int BUFF_SIZE = 2000;
 		byte[] buff = new byte[BUFF_SIZE];

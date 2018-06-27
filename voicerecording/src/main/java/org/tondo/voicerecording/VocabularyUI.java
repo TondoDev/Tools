@@ -12,6 +12,7 @@ import javax.sound.sampled.AudioSystem;
 
 import org.tondo.voicerecording.adf.AdfEntry;
 import org.tondo.voicerecording.audio.AdfStreamer;
+import org.tondo.voicerecording.audio.AdfStreamer.Sequence;
 import org.tondo.voicerecording.audio.FfmpegMp3Convertor;
 import org.tondo.voicerecording.audio.SoundPlayer;
 import org.tondo.voicerecording.audio.SoundRecorder;
@@ -161,16 +162,13 @@ public class VocabularyUI extends Application {
 	
 	private AdfStreamer prepareStream() {
 		AdfStreamer streamer = new AdfStreamer(Voicerecording.getAudioFormat());
-    	streamer.start()
-    		//.silence(200)
-    		.destination()
-    		.silence(500)
-    		.source()
-    		.silence(500)
-    		.destination()
-    		//.silence(200)
-    	.setEntries(Arrays.asList(this.adfEntry));
-    	
+		Sequence sequence = AdfStreamer.createSequence()
+	    		.destination()
+	    		.silence(500)
+	    		.source()
+	    		.silence(500)
+	    		.destination();
+		streamer.initPlayback(sequence, Arrays.asList(this.adfEntry));
     	return streamer;
 	}
 

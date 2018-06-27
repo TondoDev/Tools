@@ -1,16 +1,15 @@
 package org.tondo.voicerecording.adf.io;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.util.Arrays;
 
 import org.junit.Test;
 import org.tondo.voicerecording.Voicerecording;
 import org.tondo.voicerecording.adf.AdfEntry;
 import org.tondo.voicerecording.audio.AdfStreamer;
+import org.tondo.voicerecording.audio.AdfStreamer.Sequence;
 import org.tondo.voicerecording.audio.FfmpegMp3Convertor;
 
 public class ExperimetnsTest {
@@ -58,15 +57,22 @@ public class ExperimetnsTest {
 	@Test
 	public void testFfmpeg() {
 		AdfStreamer streamer = new AdfStreamer(Voicerecording.getAudioFormat());
-    	streamer.start()
-    		//.silence(200)
-    		.destination()
-    		.silence(500)
-    		.source()
-    		.silence(500)
-    		.destination()
-    		//.silence(200)
-    	.setEntries(Arrays.asList(new AdfEntry()));
+		Sequence sequence = AdfStreamer.createSequence()
+				.destination()
+	    		.silence(500)
+	    		.source()
+	    		.silence(500)
+	    		.destination();
+		streamer.initPlayback(sequence, Arrays.asList(new AdfEntry()));
+//    	streamer.start()
+//    		//.silence(200)
+//    		.destination()
+//    		.silence(500)
+//    		.source()
+//    		.silence(500)
+//    		.destination()
+//    		//.silence(200)
+//    	.setEntries(Arrays.asList(new AdfEntry()));
     	
     	FfmpegMp3Convertor convertor = new FfmpegMp3Convertor("bin/ffmpeg/bin/ffmpeg.exe");
     	convertor.convert(streamer, "outputs/ulozene.mp3");
