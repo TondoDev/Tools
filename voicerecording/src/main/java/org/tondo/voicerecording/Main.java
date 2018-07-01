@@ -97,20 +97,19 @@ public class Main extends Application{
 		destHbox.getChildren().addAll(this.destlabel, this.destWord,  this.destSoundRec, this.destSoundPlay, this.destSoundRemove);
 		
 		HBox specialCharsHBox = new HBox();
-		Button upperA = new Button("\u00c4");
-		// toto zabrani, aby tlacitko s pismenom dostalo focus pri stlaceni
-		// a ten ostal na textfielde, kde sa maju doplnit znaky
-		upperA.setFocusTraversable(false);
 		specialCharsHBox.setPadding(new Insets(5));
-		specialCharsHBox.getChildren().add(upperA);
-		upperA.setOnAction(e -> {
-			Node focusOwner = this.destlabel.getScene().getFocusOwner();
-			if (focusOwner instanceof TextField) {
-				TextField f = (TextField)focusOwner;
-				int carret = f.getCaretPosition();
-				f.insertText(carret, "\u00c4");
-			}
-		});
+		specialCharsHBox.setSpacing(10);
+		Button upperA = createSpecialCharButton("\u00c4");
+		Button upperO = createSpecialCharButton("\u00d6");
+		Button upperU = createSpecialCharButton("\u00dc");
+		Button lowerA = createSpecialCharButton("\u00e4");
+		Button lowerU = createSpecialCharButton("\u00fc");
+		Button lowerO = createSpecialCharButton("\u00f6");
+		Button stringS = createSpecialCharButton("\u00df");
+		
+		
+		specialCharsHBox.getChildren().addAll(upperA, upperO, upperU, lowerA, lowerO, lowerU, stringS);
+		
 		
 		VBox dataAreaBox = new VBox();
 		dataAreaBox.setSpacing(4);
@@ -133,6 +132,25 @@ public class Main extends Application{
 		toolbar.getItems().addAll(this.tbNew, this.tbLoad, this.tbSave, new Separator(), this.tbNewEntry, this.tbDeleteEntry);
 		
 		return toolbar;
+	}
+	
+	
+	private Button createSpecialCharButton(String specialChar) {
+		Button btn = new Button(specialChar);
+		// toto zabrani, aby tlacitko s pismenom dostalo focus pri stlaceni
+		// a ten ostal na textfielde, kde sa maju doplnit znaky
+		btn.setFocusTraversable(false);
+		btn.setOnAction(e -> {
+			Node focusOwner = this.destlabel.getScene().getFocusOwner();
+			if (focusOwner instanceof TextField) {
+				TextField f = (TextField)focusOwner;
+				int carret = f.getCaretPosition();
+				f.insertText(carret, specialChar);
+			}
+		});
+		
+		
+		return btn;
 	}
 	
 	
