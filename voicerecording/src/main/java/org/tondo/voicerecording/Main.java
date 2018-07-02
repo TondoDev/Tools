@@ -1,5 +1,11 @@
 package org.tondo.voicerecording;
 
+import java.util.List;
+
+import org.tondo.voicerecording.adf.AdfEntry;
+import org.tondo.voicerecording.adf.AdfFile;
+import org.tondo.voicerecording.control.MainController;
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -19,17 +25,17 @@ import javafx.stage.Stage;
 public class Main extends Application{
 	
 	
-	private Label srcLabel;
-	private TextField srcWord;
-	private Button srcSoundRec;
-	private Button srcSoundPlay;
-	private Button srcSoundRemove;
+	private Label srcLabel; //
+	private TextField srcWord; //
+	private Button srcSoundRec; //
+	private Button srcSoundPlay; //
+	private Button srcSoundRemove; //
 	
-	private Label destlabel;
-	private TextField destWord;
-	private Button destSoundRec;
-	private Button destSoundPlay;
-	private Button destSoundRemove;
+	private Label destlabel; //
+	private TextField destWord; // 
+	private Button destSoundRec; //
+	private Button destSoundPlay; //
+	private Button destSoundRemove; //
 	
 	
 	private Button tbLoad;
@@ -38,7 +44,10 @@ public class Main extends Application{
 	private Button tbNewEntry;
 	private Button tbDeleteEntry;
 	
-	private ListView<String> listEntries;
+	private ListView<AdfEntry> adfListEntries;
+	
+	private VBox dataAreaBox;
+	private MainController controller;
 	
 
 	
@@ -48,18 +57,17 @@ public class Main extends Application{
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		primaryStage.setTitle("Layout");
-		//primaryStage.initStyle(StageStyle.TRANSPARENT);
-
+		this.controller = new MainController();
 		
+		primaryStage.setTitle("Layout");
 		
 		BorderPane layout = new BorderPane();
 		layout.setTop(createToolbar());
 		layout.setCenter(createDataArea());
+		this.dataAreaBox.setDisable(true);
 		
-		this.listEntries = new ListView<>();
-		this.listEntries.getItems().addAll("kkt", "cck");
-		layout.setLeft(listEntries);
+		this.adfListEntries = new ListView<>();
+		layout.setLeft(adfListEntries);
 		
 		primaryStage.setScene(new Scene(layout));
 		
@@ -111,11 +119,11 @@ public class Main extends Application{
 		specialCharsHBox.getChildren().addAll(upperA, upperO, upperU, lowerA, lowerO, lowerU, stringS);
 		
 		
-		VBox dataAreaBox = new VBox();
-		dataAreaBox.setSpacing(4);
-		dataAreaBox.getChildren().addAll(srcHbox, destHbox, specialCharsHBox);
+		this.dataAreaBox = new VBox();
+		this.dataAreaBox.setSpacing(4);
+		this.dataAreaBox.getChildren().addAll(srcHbox, destHbox, specialCharsHBox);
 		
-		return dataAreaBox;
+		return this.dataAreaBox;
 	}
 	
 	
@@ -125,11 +133,11 @@ public class Main extends Application{
 		this.tbNew = new Button("NEW");
 		this.tbLoad = new Button("LOAD");
 		this.tbSave = new Button("SAVE");
-		
 		this.tbNewEntry = new Button("New Entry");
 		this.tbDeleteEntry = new Button("Delete");
-		
 		toolbar.getItems().addAll(this.tbNew, this.tbLoad, this.tbSave, new Separator(), this.tbNewEntry, this.tbDeleteEntry);
+		
+		this.tbNew.setOnAction(e -> onButtonNewAdf());
 		
 		return toolbar;
 	}
@@ -148,9 +156,28 @@ public class Main extends Application{
 				f.insertText(carret, specialChar);
 			}
 		});
-		
-		
 		return btn;
+	}
+	
+	
+	// LIST CONTROLLER
+	private void onButtonNewAdf() {
+		AdfFile adf = this.controller.createNewAdfFile();
+		this.initListWithAdf(adf.getEntries());
+		
+		
+	}
+	
+	/* ==================================================*/
+	// dataArea
+	
+	
+	
+	/* ==================================================*/
+	// adfListEntries
+	private void initListWithAdf(List<AdfEntry> entries) {
+		this.adfListEntries.getItems().clear();
+		this.adfListEntries.getItems().addAll(entries);
 	}
 	
 	
