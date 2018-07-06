@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.tondo.voicerecording.adf.AdfEntry;
 import org.tondo.voicerecording.adf.AdfFile;
+import org.tondo.voicerecording.control.DataAreaController;
 import org.tondo.voicerecording.control.MainController;
 import org.tondo.voicerecording.ui.DataArea;
 
@@ -19,6 +20,7 @@ import javafx.stage.Stage;
 public class Main extends Application{
 	
 	private DataArea dataArea;
+	private DataAreaController dataAreaCtr;
 	
 	
 	private Button tbLoad;
@@ -46,8 +48,9 @@ public class Main extends Application{
 		BorderPane layout = new BorderPane();
 		layout.setTop(createToolbar());
 		this.dataArea = new DataArea();
+		this.dataAreaCtr = new DataAreaController(this.dataArea);
 		layout.setCenter(this.dataArea);
-		this.dataArea.setDisable(true);
+		//this.dataArea.setDisable(true);
 		
 		this.adfListEntries = new ListView<>();
 		layout.setLeft(adfListEntries);
@@ -80,6 +83,12 @@ public class Main extends Application{
 	private void onButtonNewAdf() {
 		AdfFile adf = this.controller.createNewAdfFile();
 		this.initListWithAdf(adf.getEntries());
+		AdfEntry entry = new AdfEntry();
+		entry.setSrcWord("spinas");
+		entry.setDestWord("kkt");
+		entry.setDestSoundRaw(new byte[5]);
+		this.dataAreaCtr.setLanguages(adf.getHeader().getSrcLoc(), adf.getHeader().getDestLoc());
+		this.dataAreaCtr.setAdfContext(entry);
 	}
 	
 	/* ==================================================*/

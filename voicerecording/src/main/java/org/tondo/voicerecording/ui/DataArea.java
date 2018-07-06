@@ -7,6 +7,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 public class DataArea extends VBox {
@@ -22,6 +23,11 @@ public class DataArea extends VBox {
 	private Button destSoundPlay;
 	private Button destSoundRemove;
 	private TextField destWord;
+	
+	private HBox specialCharsHBox;
+	
+	private Button ok;
+	private Button cancel;
 	
 	
 	public DataArea() {
@@ -52,9 +58,9 @@ public class DataArea extends VBox {
 
 		destHbox.getChildren().addAll(this.destlabel, this.destWord,  this.destSoundRec, this.destSoundPlay, this.destSoundRemove);
 		
-		HBox specialCharsHBox = new HBox();
-		specialCharsHBox.setPadding(new Insets(5));
-		specialCharsHBox.setSpacing(10);
+		this.specialCharsHBox = new HBox();
+		this.specialCharsHBox.setPadding(new Insets(5));
+		this.specialCharsHBox.setSpacing(10);
 		Button upperA = createSpecialCharButton("\u00c4");
 		Button upperO = createSpecialCharButton("\u00d6");
 		Button upperU = createSpecialCharButton("\u00dc");
@@ -63,11 +69,21 @@ public class DataArea extends VBox {
 		Button lowerO = createSpecialCharButton("\u00f6");
 		Button strongS = createSpecialCharButton("\u00df");
 		
+		this.specialCharsHBox.getChildren().addAll(upperA, upperO, upperU, lowerA, lowerO, lowerU, strongS);
 		
-		specialCharsHBox.getChildren().addAll(upperA, upperO, upperU, lowerA, lowerO, lowerU, strongS);
+		HBox confirmBox = new HBox();
+		confirmBox.setAlignment(Pos.BOTTOM_RIGHT);
+		this.cancel = new Button("Cancel");
+		this.ok = new Button("Ok");
+		confirmBox.setSpacing(4);
+		confirmBox.setPadding(new Insets(5));
+		//System.out.println(confirmBox.getMaxHeight());
+		//confirmBox.setMaxHeight(Double.MAX_VALUE);
+		VBox.setVgrow(confirmBox, Priority.ALWAYS);
+		confirmBox.getChildren().addAll(this.ok, this.cancel);
 		
 		this.setSpacing(4);
-		this.getChildren().addAll(srcHbox, destHbox, specialCharsHBox);
+		this.getChildren().addAll(srcHbox, destHbox, specialCharsHBox, confirmBox);
 	}
 	
 	
@@ -125,5 +141,17 @@ public class DataArea extends VBox {
 	
 	public Label getDestlabel() {
 		return destlabel;
+	}
+	
+	public HBox getSpecialCharsHBox() {
+		return specialCharsHBox;
+	}
+	
+	public Button getOkButton() {
+		return this.ok;
+	}
+	
+	public Button getCancelButton() {
+		return this.cancel;
 	}
 }
