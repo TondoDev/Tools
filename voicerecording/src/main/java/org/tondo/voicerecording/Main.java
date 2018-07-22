@@ -1,10 +1,9 @@
 package org.tondo.voicerecording;
 
-import java.util.List;
-
 import org.tondo.voicerecording.adf.AdfEntry;
 import org.tondo.voicerecording.adf.AdfFile;
 import org.tondo.voicerecording.control.DataAreaController;
+import org.tondo.voicerecording.control.ListController;
 import org.tondo.voicerecording.control.MainContext;
 import org.tondo.voicerecording.ui.AdfListView;
 import org.tondo.voicerecording.ui.DataArea;
@@ -32,6 +31,7 @@ public class Main extends Application{
 	private Button tbDeleteEntry;
 	
 	private AdfListView adfListEntries;
+	private ListController listController;
 	
 	private MainContext controller;
 	
@@ -52,12 +52,11 @@ public class Main extends Application{
 		this.dataArea = new DataArea();
 		this.dataAreaCtr = new DataAreaController(this.dataArea);
 		layout.setCenter(this.dataArea);
+		this.dataArea.getCancelButton().setOnAction(e -> onChangesDiscard());
+		this.dataArea.getOkButton().setOnAction(e -> onChangeConfirm());
 		
 		this.adfListEntries = new AdfListView();
 		layout.setLeft(adfListEntries);
-		
-		this.dataArea.getCancelButton().setOnAction(e -> onChangesDiscard());
-		this.dataArea.getOkButton().setOnAction(e -> onChangeConfirm());
 		this.adfListEntries.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<AdfEntry>() {
 
 			@Override
@@ -66,6 +65,7 @@ public class Main extends Application{
 				
 			}
 		});
+		this.listController = new ListController(this.adfListEntries);
 		
 		
 		primaryStage.setScene(new Scene(layout));
@@ -92,9 +92,12 @@ public class Main extends Application{
 	}
 	
 	// ============ TOOLBAR HANDLERS
+	/**
+	 * Creates new ADF file structure and begin edit of first ADF entry
+	 */
 	private void onButtonNewAdf() {
 		AdfFile adf = this.controller.createNewAdfFile();
-		this.initListWithAdf(adf.getEntries());
+		this.listController.setEntries(adf.getEntries());
 		AdfEntry entry = new AdfEntry();
 		entry.setSrcWord("spinas");
 		entry.setDestWord("kkt");
@@ -133,6 +136,7 @@ public class Main extends Application{
 		this.dataAreaCtr.setEditable(false);
 		this.adfListEntries.getItems().add(entry);
 		this.adfListEntries.setDisable(false);
+		this.adfListEntries.getSelectionModel().select(entry);
 	}
 	
 	// ------------ DATA AREA HANDLERS
@@ -140,12 +144,6 @@ public class Main extends Application{
 	
 	/* ==================================================*/
 	// adfListEntries
-	private void initListWithAdf(List<AdfEntry> entries) {
-		this.adfListEntries.getItems().clear();
-		this.adfListEntries.getItems().addAll(entries);
-	}
-	
-	
 	private void onListSelectedItemChanged(AdfEntry newValue) {
 		this.dataAreaCtr.setAdfContext(newValue);
 	}

@@ -5,10 +5,16 @@ import org.tondo.voicerecording.adf.AdfEntry;
 import org.tondo.voicerecording.adf.AdfFile;
 import org.tondo.voicerecording.adf.AdfHeader;
 
+/**
+ * 
+ * @author TondoDev
+ *
+ */
 public class MainContext {
 	
 	private AdfFile currentAdfFile;
 	private AdfEntry lastShown;
+	private EditingState editState;
 	
 	public AdfFile createNewAdfFile () {
 		AdfHeader header = new AdfHeader();
@@ -17,6 +23,14 @@ public class MainContext {
 		header.setAudioFormat(Voicerecording.getAudioFormat());
 		this.currentAdfFile = new AdfFile(header);
 		return this.currentAdfFile;
+	}
+	
+	public EditingState getEditState() {
+		return editState;
+	}
+	
+	public void setEditState(EditingState editState) {
+		this.editState = editState;
 	}
 	
 	
