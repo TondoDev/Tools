@@ -28,11 +28,13 @@ public class DataAreaController {
 	
 	
 	public void setEditable(boolean editable) {
-		this.editable = editable;
-		if (this.adfContext != null) {
-			this.initBuffers(this.adfContext);
+		if (this.editable != editable) {
+			this.editable = editable;
+			if (this.adfContext != null && this.editable) {
+				this.initBuffers(this.adfContext);
+			}
+			setControlsDisabledState();
 		}
-		setControlsDisabledState();
 	}
 	
 	
@@ -88,7 +90,11 @@ public class DataAreaController {
 	
 	public AdfEntry confirmChanges() {
 		// populate adf entry from buffers and texts
-		return null;
+		this.adfContext.setSrcWord(this.dataArea.getSrcWord().getText());
+		this.adfContext.setDestWord(this.dataArea.getDestWord().getText());
+		this.adfContext.setSrcSoundRaw(copyBuffer(this.srcSoundBuffer));
+		this.adfContext.setDestSoundRaw(copyBuffer(this.destSoundBuffer));
+		return this.adfContext;
 	}
 	
 	public void discardChanges() {
@@ -104,6 +110,8 @@ public class DataAreaController {
 		this.adfContext = null;
 		this.srcSoundBuffer = null;
 		this.destSoundBuffer = null;
-		setControlsDisabledState();
+		this.dataArea.getSrcWord().setText(null);
+		this.dataArea.getDestWord().setText(null);
+		//setControlsDisabledState();
 	}
 }
