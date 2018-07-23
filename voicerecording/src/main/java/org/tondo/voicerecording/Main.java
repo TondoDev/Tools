@@ -3,6 +3,7 @@ package org.tondo.voicerecording;
 import org.tondo.voicerecording.adf.AdfEntry;
 import org.tondo.voicerecording.adf.AdfFile;
 import org.tondo.voicerecording.control.DataAreaController;
+import org.tondo.voicerecording.control.EditingState;
 import org.tondo.voicerecording.control.ListController;
 import org.tondo.voicerecording.control.MainContext;
 import org.tondo.voicerecording.ui.AdfListView;
@@ -12,6 +13,8 @@ import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Separator;
 import javafx.scene.control.ToolBar;
@@ -28,6 +31,7 @@ public class Main extends Application{
 	private Button tbSave;
 	private Button tbNew;
 	private Button tbNewEntry;
+	private Button tbEditEntry;
 	private Button tbDeleteEntry;
 	
 	private AdfListView adfListEntries;
@@ -82,11 +86,13 @@ public class Main extends Application{
 		this.tbLoad = new Button("LOAD");
 		this.tbSave = new Button("SAVE");
 		this.tbNewEntry = new Button("New Entry");
+		this.tbEditEntry = new Button("Edit entry");
 		this.tbDeleteEntry = new Button("Delete");
-		toolbar.getItems().addAll(this.tbNew, this.tbLoad, this.tbSave, new Separator(), this.tbNewEntry, this.tbDeleteEntry);
+		toolbar.getItems().addAll(this.tbNew, this.tbLoad, this.tbSave, new Separator(), this.tbNewEntry, this.tbEditEntry, this.tbDeleteEntry);
 		
 		this.tbNew.setOnAction(e -> onButtonNewAdf());
 		this.tbNewEntry.setOnAction(e -> onNewEntry());
+		this.tbEditEntry.setOnAction(e -> onEditEntry());
 		
 		return toolbar;
 	}
@@ -96,23 +102,52 @@ public class Main extends Application{
 	 * Creates new ADF file structure and begin edit of first ADF entry
 	 */
 	private void onButtonNewAdf() {
+		
+		if (this.controller.getAdfFile() != null) {
+			Alert alert = new Alert(AlertType.WARNING);
+			alert.setContentText("TODO: One file already in progress!!!");
+			alert.showAndWait();
+			return;
+		}
+
 		AdfFile adf = this.controller.createNewAdfFile();
 		this.listController.setEntries(adf.getEntries());
 		AdfEntry entry = new AdfEntry();
 		entry.setSrcWord("spinas");
 		entry.setDestWord("kkt");
 		entry.setDestSoundRaw(new byte[5]);
+		this.controller.setEditState(EditingState.NEW);
 		this.dataAreaCtr.setLanguages(adf.getHeader().getSrcLoc(), adf.getHeader().getDestLoc());
 		this.dataAreaCtr.setAdfContext(entry);
 		this.dataAreaCtr.setEditable(true);
 	}
 	
 	private void onNewEntry() {
+		if (this.controller.getEditState() != null) {
+			Alert alert = new Alert(AlertType.WARNING);
+			alert.setContentText("TODO: Entry edited!!!");
+			alert.showAndWait();
+			return;
+		}
+		
 		AdfEntry entry = new AdfEntry();
 		this.dataAreaCtr.setAdfContext(entry);
 		this.dataAreaCtr.setEditable(true);
 		this.adfListEntries.setDisable(true);
-		this.controller.setLastShownEntry(this.adfListEntries.getSelectionModel().getSelectedItem());
+		this.controller.setEditState(EditingState.NEW);
+	}
+	
+	private void onEditEntry() {
+		if (this.controller.getEditState() != null) {
+			Alert alert = new Alert(AlertType.WARNING);
+			alert.setContentText("TODO: Entry edited!!!");
+			alert.showAndWait();
+			return;
+		}
+		
+		this.dataAreaCtr.setEditable(true);
+		this.adfListEntries.setDisable(true);
+		this.controller.setEditState(EditingState.EDIT);
 	}
 	
 	
@@ -121,7 +156,7 @@ public class Main extends Application{
 	
 	// ============ DATA AREA HANDLERS
 	private void onChangesDiscard() {
-		AdfEntry lastEntry = this.controller.getLastShownEntry();
+		AdfEntry lastEntry = this.listController.getSelected();
 		if (lastEntry == null) {
 			this.dataAreaCtr.clearState();
 		} else {
@@ -129,14 +164,19 @@ public class Main extends Application{
 		}
 		this.dataAreaCtr.setEditable(false);
 		this.adfListEntries.setDisable(false);
+		this.controller.setEditState(null);
 	}
 	
 	private void onChangeConfirm() {
 		AdfEntry entry = this.dataAreaCtr.confirmChanges();
 		this.dataAreaCtr.setEditable(false);
-		this.adfListEntries.getItems().add(entry);
-		this.adfListEntries.setDisable(false);
-		this.adfListEntries.getSelectionModel().select(entry);
+		
+		if (EditingState.NEW == this.controller.getEditState()) {
+			this.listController.addEntry(entry);
+		} else if (EditingState.EDIT == this.controller.getEditState()) {
+			this.listController.updateEntry(entry);
+		}
+		this.controller.setEditState(null);
 	}
 	
 	// ------------ DATA AREA HANDLERS

@@ -1,7 +1,6 @@
 package org.tondo.voicerecording.control;
 
 import org.tondo.voicerecording.Voicerecording;
-import org.tondo.voicerecording.adf.AdfEntry;
 import org.tondo.voicerecording.adf.AdfFile;
 import org.tondo.voicerecording.adf.AdfHeader;
 
@@ -13,7 +12,6 @@ import org.tondo.voicerecording.adf.AdfHeader;
 public class MainContext {
 	
 	private AdfFile currentAdfFile;
-	private AdfEntry lastShown;
 	private EditingState editState;
 	
 	public AdfFile createNewAdfFile () {
@@ -33,12 +31,7 @@ public class MainContext {
 		this.editState = editState;
 	}
 	
-	
-	public AdfEntry getLastShownEntry() {
-		return this.lastShown;
-	}
-	
-	public void setLastShownEntry(AdfEntry entry) {
-		this.lastShown = entry;
+	public AdfFile getAdfFile() {
+		return this.currentAdfFile;
 	}
 }
