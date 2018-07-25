@@ -22,8 +22,11 @@ public class DataAreaController {
 		this.adfContext = ctx;
 		if (this.adfContext != null) {
 			populateFromAdf(this.adfContext);
-			setControlsDisabledState();
+		} else {
+			this.clearState();
 		}
+		
+		setControlsDisabledState();
 	}
 	
 	

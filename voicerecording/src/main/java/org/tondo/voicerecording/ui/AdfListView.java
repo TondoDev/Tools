@@ -17,9 +17,12 @@ public class AdfListView extends ListView<AdfEntry> {
 		@Override
 		protected void updateItem(AdfEntry item, boolean empty) {
 			super.updateItem(item, empty);
-			if (item != null) {
+			if (!empty && item != null) {
 				// TODO implement correctly
 				setText(item.getSrcWord() + " - " + item.getDestWord());
+			} else {
+				// because listView reuses ListCells
+				setText(null);
 			}
 			
 		}

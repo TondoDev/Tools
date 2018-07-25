@@ -93,6 +93,7 @@ public class Main extends Application{
 		this.tbNew.setOnAction(e -> onButtonNewAdf());
 		this.tbNewEntry.setOnAction(e -> onNewEntry());
 		this.tbEditEntry.setOnAction(e -> onEditEntry());
+		this.tbDeleteEntry.setOnAction(e -> onDeleteEntry());
 		
 		return toolbar;
 	}
@@ -148,6 +149,12 @@ public class Main extends Application{
 		this.dataAreaCtr.setEditable(true);
 		this.adfListEntries.setDisable(true);
 		this.controller.setEditState(EditingState.EDIT);
+	}
+	
+	private void onDeleteEntry() {
+		if (this.controller.getEditState() == null) {
+			this.listController.removeSelected();
+		}
 	}
 	
 	

@@ -53,6 +53,17 @@ public class ListController {
 		return this.listView.getSelectionModel().getSelectedItem();
 	}
 	
+	public boolean removeSelected() {
+		int index = this.listView.getSelectionModel().getSelectedIndex();
+		if( index >= 0) {
+			this.listView.getItems().remove(index);
+			this.listView.refresh();
+			return true;
+		}
+		
+		return false;
+	}
+	
 	
 	
 	private int findEntry(AdfEntry entry) {
