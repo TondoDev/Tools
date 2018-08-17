@@ -1,5 +1,7 @@
 package org.tondo.voicerecording.control;
 
+import java.nio.file.Path;
+
 import org.tondo.voicerecording.Voicerecording;
 import org.tondo.voicerecording.adf.AdfFile;
 import org.tondo.voicerecording.adf.AdfHeader;
@@ -13,6 +15,7 @@ public class MainContext {
 	
 	private AdfFile currentAdfFile;
 	private EditingState editState;
+	private Path fileLocation;
 	
 	public AdfFile createNewAdfFile () {
 		AdfHeader header = new AdfHeader();
@@ -33,5 +36,17 @@ public class MainContext {
 	
 	public AdfFile getAdfFile() {
 		return this.currentAdfFile;
+	}
+	
+	public void setAdfFile(AdfFile adfFile) {
+		this.currentAdfFile = adfFile;
+	}
+	
+	public void setFileLocation(Path location) {
+		this.fileLocation = location;
+	}
+	
+	public Path getFileLocation() {
+		return this.fileLocation;
 	}
 }

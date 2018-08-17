@@ -1,7 +1,11 @@
 package org.tondo.voicerecording;
 
+import java.io.File;
+import java.nio.file.Path;
+
 import org.tondo.voicerecording.adf.AdfEntry;
 import org.tondo.voicerecording.adf.AdfFile;
+import org.tondo.voicerecording.control.AdfFileAccessFacade;
 import org.tondo.voicerecording.control.DataAreaController;
 import org.tondo.voicerecording.control.EditingState;
 import org.tondo.voicerecording.control.ListController;
@@ -16,9 +20,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Separator;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class Main extends Application{
@@ -38,6 +44,9 @@ public class Main extends Application{
 	private ListController listController;
 	
 	private MainContext controller;
+	private AdfFileAccessFacade adfAccess;
+	
+	private Stage mainStage;
 	
 
 	
@@ -48,6 +57,7 @@ public class Main extends Application{
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		this.controller = new MainContext();
+		this.mainStage = primaryStage;
 		
 		primaryStage.setTitle("Layout");
 		
@@ -71,13 +81,14 @@ public class Main extends Application{
 		});
 		this.listController = new ListController(this.adfListEntries);
 		
+		this.adfAccess = new AdfFileAccessFacade();
+		
+		// this will disable controls
+		this.dataAreaCtr.setAdfContext(null);
 		
 		primaryStage.setScene(new Scene(layout));
 		primaryStage.show();
 	}
-	
-	
-	
 	
 	private ToolBar createToolbar() {
 		ToolBar toolbar = new ToolBar();
@@ -91,12 +102,15 @@ public class Main extends Application{
 		toolbar.getItems().addAll(this.tbNew, this.tbLoad, this.tbSave, new Separator(), this.tbNewEntry, this.tbEditEntry, this.tbDeleteEntry);
 		
 		this.tbNew.setOnAction(e -> onButtonNewAdf());
+		this.tbLoad.setOnAction(e -> onButtonLoadAdf());
+		this.tbSave.setOnAction(e -> onButtonSaveAdf());
 		this.tbNewEntry.setOnAction(e -> onNewEntry());
 		this.tbEditEntry.setOnAction(e -> onEditEntry());
 		this.tbDeleteEntry.setOnAction(e -> onDeleteEntry());
 		
 		return toolbar;
 	}
+	
 	
 	// ============ TOOLBAR HANDLERS
 	/**
@@ -157,6 +171,44 @@ public class Main extends Application{
 		}
 	}
 	
+	private void onButtonSaveAdf() {
+		if (this.controller.getAdfFile() == null) {
+			Alert alert = new Alert(AlertType.WARNING);
+			alert.setContentText("TODO: No Adf to save!");
+			alert.showAndWait();
+			return;
+		} else if (this.controller.getFileLocation() == null) {
+			Path selectedFile = openSaveDialog(this.mainStage);
+			if (selectedFile != null) {
+				this.adfAccess.saveAdf(this.controller.getAdfFile(), selectedFile);
+				this.controller.setFileLocation(selectedFile);
+			}
+		} else {
+			// just save into loaded path
+			Alert alert = new Alert(AlertType.CONFIRMATION);
+			if(alert.showAndWait().get()== ButtonType.OK) {
+				System.out.println("OK");
+				this.adfAccess.saveAdf(this.controller.getAdfFile(), this.controller.getFileLocation());
+			}
+		}
+	}
+	
+	public void onButtonLoadAdf() {
+		// trigger saving procedure
+		if (this.controller.getAdfFile() != null) {
+			Alert alert = new Alert(AlertType.CONFIRMATION);
+			System.out.println(alert.showAndWait().get());
+		} else {
+			Path file = openLoadDialog(this.mainStage);
+			if (file != null) {
+				AdfFile loadedAdf = this.adfAccess.loadAdf(file);
+				this.listController.setEntries(loadedAdf.getEntries());
+				this.controller.setFileLocation(file);
+				this.controller.setAdfFile(loadedAdf);
+			}
+		}
+	}
+	
 	
 	// ------------- TOOLBAR HANDLERS 
 	
@@ -193,5 +245,23 @@ public class Main extends Application{
 	// adfListEntries
 	private void onListSelectedItemChanged(AdfEntry newValue) {
 		this.dataAreaCtr.setAdfContext(newValue);
+	}
+	
+	
+	private static Path openSaveDialog(Stage stage) {
+		return openFileDialog(stage, true);
+	}
+	
+	private static Path openLoadDialog(Stage stage) {
+		return openFileDialog(stage, false);
+	}
+	
+	private static Path openFileDialog(Stage stage, boolean save) {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Open Resource File");
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Adf files", "*.adf"));
+		File selectedFile = save ? fileChooser.showSaveDialog(stage) : fileChooser.showOpenDialog(stage);
+		
+		return selectedFile == null ? null : selectedFile.toPath();
 	}
 }

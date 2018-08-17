@@ -59,7 +59,7 @@ public class AdfWriter {
 			out.writeInt(srcData.length);
 			out.write(srcData);
 		} else {
-			out.write(0);
+			out.writeInt(0);
 		}
 		
 		writeWord(out,  entry.getDestWord());
@@ -68,7 +68,7 @@ public class AdfWriter {
 			out.writeInt(destData.length);
 			out.write(destData);
 		} else {
-			out.write(0);
+			out.writeInt(0);
 		}
 	}
 

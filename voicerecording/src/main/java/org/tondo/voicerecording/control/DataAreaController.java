@@ -50,9 +50,9 @@ public class DataAreaController {
 		this.dataArea.getSrcSoundRec().setDisable(!this.editable || this.adfContext == null);
 		this.dataArea.getDestSoundRec().setDisable(!this.editable || this.adfContext == null);
 		
-		this.dataArea.getSrcSoundPlay().setDisable(this.srcSoundBuffer == null);
+		this.dataArea.getSrcSoundPlay().setDisable(this.srcSoundBuffer == null || this.srcSoundBuffer.length == 0);
 		this.dataArea.getSrcSoundRemove().setDisable(this.srcSoundBuffer == null || !this.editable);
-		this.dataArea.getDestSoundPlay().setDisable(this.destSoundBuffer == null);
+		this.dataArea.getDestSoundPlay().setDisable(this.destSoundBuffer == null || this.destSoundBuffer.length == 0);
 		this.dataArea.getDestSoundRemove().setDisable(this.destSoundBuffer == null || !this.editable);
 		
 		this.dataArea.getSpecialCharsHBox().setDisable(!this.editable || this.adfContext == null);
