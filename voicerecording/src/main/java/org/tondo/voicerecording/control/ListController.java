@@ -32,19 +32,18 @@ public class ListController {
 		}
 	}
 	
-	
 	public void addEntry(AdfEntry entry) {
 		this.listView.getItems().add(entry);
 		this.listView.setDisable(false);
 		this.listView.getSelectionModel().select(entry);
 	}
 	
-	
 	public void updateEntry(AdfEntry entry) {
 		this.listView.setDisable(false);
 		int idx = findEntry(entry);
 		if (idx >= 0) {
 			this.entries.set(idx, entry);
+			this.listView.getSelectionModel().select(entry);
 		}
 		//this.listView.refresh();
 	}
@@ -63,8 +62,6 @@ public class ListController {
 		
 		return false;
 	}
-	
-	
 	
 	private int findEntry(AdfEntry entry) {
 		int len = this.entries.size();

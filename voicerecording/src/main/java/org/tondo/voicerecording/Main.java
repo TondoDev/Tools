@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import org.tondo.voicerecording.adf.AdfEntry;
 import org.tondo.voicerecording.adf.AdfFile;
 import org.tondo.voicerecording.control.AdfFileAccessFacade;
+import org.tondo.voicerecording.control.AdfFileDialogsController;
 import org.tondo.voicerecording.control.DataAreaController;
 import org.tondo.voicerecording.control.EditingState;
 import org.tondo.voicerecording.control.ListController;
@@ -45,6 +46,7 @@ public class Main extends Application{
 	
 	private MainContext controller;
 	private AdfFileAccessFacade adfAccess;
+	private AdfFileDialogsController fileDialog;
 	
 	private Stage mainStage;
 	
@@ -82,9 +84,11 @@ public class Main extends Application{
 		this.listController = new ListController(this.adfListEntries);
 		
 		this.adfAccess = new AdfFileAccessFacade();
+		this.fileDialog = new AdfFileDialogsController(primaryStage);
 		
 		// this will disable controls
 		this.dataAreaCtr.setAdfContext(null);
+		this.refreshToolbarState();
 		
 		primaryStage.setScene(new Scene(layout));
 		primaryStage.show();
@@ -99,7 +103,8 @@ public class Main extends Application{
 		this.tbNewEntry = new Button("New Entry");
 		this.tbEditEntry = new Button("Edit entry");
 		this.tbDeleteEntry = new Button("Delete");
-		toolbar.getItems().addAll(this.tbNew, this.tbLoad, this.tbSave, new Separator(), this.tbNewEntry, this.tbEditEntry, this.tbDeleteEntry);
+		Button tbTest = new Button("Test");
+		toolbar.getItems().addAll(tbTest, this.tbNew, this.tbLoad, this.tbSave, new Separator(), this.tbNewEntry, this.tbEditEntry, this.tbDeleteEntry);
 		
 		this.tbNew.setOnAction(e -> onButtonNewAdf());
 		this.tbLoad.setOnAction(e -> onButtonLoadAdf());
@@ -107,6 +112,9 @@ public class Main extends Application{
 		this.tbNewEntry.setOnAction(e -> onNewEntry());
 		this.tbEditEntry.setOnAction(e -> onEditEntry());
 		this.tbDeleteEntry.setOnAction(e -> onDeleteEntry());
+		tbTest.setOnAction(e -> {
+			this.fileDialog.newAdfDialog(this.controller);
+		});
 		
 		return toolbar;
 	}
@@ -135,6 +143,8 @@ public class Main extends Application{
 		this.dataAreaCtr.setLanguages(adf.getHeader().getSrcLoc(), adf.getHeader().getDestLoc());
 		this.dataAreaCtr.setAdfContext(entry);
 		this.dataAreaCtr.setEditable(true);
+		
+		refreshToolbarState();
 	}
 	
 	private void onNewEntry() {
@@ -150,6 +160,8 @@ public class Main extends Application{
 		this.dataAreaCtr.setEditable(true);
 		this.adfListEntries.setDisable(true);
 		this.controller.setEditState(EditingState.NEW);
+		
+		refreshToolbarState();
 	}
 	
 	private void onEditEntry() {
@@ -163,6 +175,8 @@ public class Main extends Application{
 		this.dataAreaCtr.setEditable(true);
 		this.adfListEntries.setDisable(true);
 		this.controller.setEditState(EditingState.EDIT);
+		
+		refreshToolbarState();
 	}
 	
 	private void onDeleteEntry() {
@@ -207,10 +221,24 @@ public class Main extends Application{
 				this.controller.setAdfFile(loadedAdf);
 			}
 		}
+		
+		refreshToolbarState();
 	}
 	
 	
 	// ------------- TOOLBAR HANDLERS 
+	private void refreshToolbarState() {
+		boolean hasAdf = this.controller.getAdfFile() != null;
+		boolean hasSelected = this.listController.getSelected() != null;
+		boolean isEditing = this.controller.getEditState() == EditingState.NEW || this.controller.getEditState() == EditingState.EDIT;
+		
+		this.tbNew.setDisable(isEditing);
+		this.tbLoad.setDisable(isEditing);
+		this.tbSave.setDisable(!hasAdf || isEditing);
+		this.tbNewEntry.setDisable(!hasAdf || isEditing);
+		this.tbEditEntry.setDisable(isEditing || !hasSelected);
+		this.tbDeleteEntry.setDisable(isEditing || !hasSelected);
+	}
 	
 	
 	// ============ DATA AREA HANDLERS
@@ -224,6 +252,8 @@ public class Main extends Application{
 		this.dataAreaCtr.setEditable(false);
 		this.adfListEntries.setDisable(false);
 		this.controller.setEditState(null);
+		
+		refreshToolbarState();
 	}
 	
 	private void onChangeConfirm() {
@@ -236,6 +266,7 @@ public class Main extends Application{
 			this.listController.updateEntry(entry);
 		}
 		this.controller.setEditState(null);
+		refreshToolbarState();
 	}
 	
 	// ------------ DATA AREA HANDLERS
@@ -245,6 +276,7 @@ public class Main extends Application{
 	// adfListEntries
 	private void onListSelectedItemChanged(AdfEntry newValue) {
 		this.dataAreaCtr.setAdfContext(newValue);
+		refreshToolbarState();
 	}
 	
 	
