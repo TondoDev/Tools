@@ -56,10 +56,12 @@ public class AdfFileDialogsController {
 		Optional<AdfHeader> headerForNewAdf = new AdfPropertiesDialog().showAndWait();
 		if (!headerForNewAdf.isPresent()) {
 			System.out.println("== SAVE WITHOUT CREATE");
+			context.setAdfFile(null);
+			context.setFileLocation(null);
 			return DialogResult.NOT_COMPLETED;
 		}
-		
-		System.out.println("== CREATED");
+
+		context.createNewAdfFile(headerForNewAdf.get());
 		return DialogResult.OK;
 	}
 	
@@ -71,17 +73,16 @@ public class AdfFileDialogsController {
 			 if (result == ButtonData.CANCEL_CLOSE) {
 				 return DialogResult.CANCEL;
 			 } else if (result == ButtonData.YES) {
-				System.out.println("== SAVING...");
+				 // overwriting current file
+				 this.fileAccess.saveAdf(context.getAdfFile(), context.getFileLocation());
 			 } else if (result == ButtonData.NO) {
 				 // select new file for saving 
 				 if (!saveByDialog(context)) {
 					 return DialogResult.CANCEL;
 				 }
 			 }
-		} else {
-			 if (!saveByDialog(context)) {
-				 return DialogResult.CANCEL;
-			 }
+		} else if (!saveByDialog(context)) {
+			return DialogResult.CANCEL;
 		}
 		
 		return DialogResult.OK;
@@ -116,7 +117,7 @@ public class AdfFileDialogsController {
 		}
 
 		Path pathToSave = fileToSave.toPath();
-		//this.fileAccess.saveAdf(context.getAdfFile(), pathToSave);
+		this.fileAccess.saveAdf(context.getAdfFile(), pathToSave);
 		context.setFileLocation(pathToSave);
 		return true;
 	}
@@ -128,6 +129,7 @@ public class AdfFileDialogsController {
 		File fileToLoad = fileChooser.showOpenDialog(this.stage);
 		
 		if (fileToLoad == null) {
+			
 			return false;
 		}
 		

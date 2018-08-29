@@ -22,6 +22,10 @@ public class MainContext {
 		header.setSrcLoc("SK");
 		header.setDestLoc("DE");
 		header.setAudioFormat(Voicerecording.getAudioFormat());
+		return createNewAdfFile(header);
+	}
+	
+	public AdfFile createNewAdfFile(AdfHeader header) {
 		this.currentAdfFile = new AdfFile(header);
 		return this.currentAdfFile;
 	}
