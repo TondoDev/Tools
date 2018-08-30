@@ -41,9 +41,6 @@ public class Main extends Application{
 	private MainContext controller;
 	private AdfFileDialogsController fileDialog;
 	
-	
-
-	
 	public static void main(String[] args) {
 		launch(args);
 	}
@@ -141,7 +138,7 @@ public class Main extends Application{
 	}
 	
 	private void onNewEntry() {
-		if (this.controller.getEditState() != null) {
+		if (this.controller.getEditState() != EditingState.BROWSE) {
 			Alert alert = new Alert(AlertType.WARNING);
 			alert.setContentText("TODO: Entry edited!!!");
 			alert.showAndWait();
@@ -158,7 +155,7 @@ public class Main extends Application{
 	}
 	
 	private void onEditEntry() {
-		if (this.controller.getEditState() != null) {
+		if (this.controller.getEditState() != EditingState.BROWSE) {
 			Alert alert = new Alert(AlertType.WARNING);
 			alert.setContentText("TODO: Entry edited!!!");
 			alert.showAndWait();
@@ -173,7 +170,7 @@ public class Main extends Application{
 	}
 	
 	private void onDeleteEntry() {
-		if (this.controller.getEditState() == null) {
+		if (this.controller.getEditState() == EditingState.BROWSE) {
 			this.listController.removeSelected();
 		}
 	}
@@ -219,7 +216,7 @@ public class Main extends Application{
 		}
 		this.dataAreaCtr.setEditable(false);
 		this.adfListEntries.setDisable(false);
-		this.controller.setEditState(null);
+		this.controller.setEditState( EditingState.BROWSE);
 		
 		refreshToolbarState();
 	}
@@ -233,7 +230,7 @@ public class Main extends Application{
 		} else if (EditingState.EDIT == this.controller.getEditState()) {
 			this.listController.updateEntry(entry);
 		}
-		this.controller.setEditState(null);
+		this.controller.setEditState(EditingState.BROWSE);
 		refreshToolbarState();
 	}
 	
