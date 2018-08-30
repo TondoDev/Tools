@@ -1,6 +1,9 @@
 package org.tondo.voicerecording.control;
 
 import org.tondo.voicerecording.adf.AdfEntry;
+import org.tondo.voicerecording.adf.AdfHeader;
+import org.tondo.voicerecording.audio.SoundPlayer;
+import org.tondo.voicerecording.audio.SoundRecorder;
 import org.tondo.voicerecording.ui.DataArea;
 
 public class DataAreaController {
@@ -10,13 +13,24 @@ public class DataAreaController {
 	
 	private byte[] srcSoundBuffer;
 	private byte[] destSoundBuffer;
-	
 	private boolean editable;
+	
+	
+	private SoundRecorder recorder;
+	private SoundPlayer player;
+	
 	
 	public DataAreaController(DataArea area) {
 		this.dataArea = area;
+		
+		this.setupButtonHandlers();
 	}
 	
+	public void init(AdfHeader header) {
+		this.setLanguages(header.getSrcLoc(), header.getDestLoc());
+		this.recorder = new SoundRecorder(header.getAudioFormat());
+		this.player = new SoundPlayer(header.getAudioFormat());
+	}
 	
 	public void setAdfContext(AdfEntry ctx) {
 		this.adfContext = ctx;
@@ -29,7 +43,6 @@ public class DataAreaController {
 		setControlsDisabledState();
 	}
 	
-	
 	public void setEditable(boolean editable) {
 		if (this.editable != editable) {
 			this.editable = editable;
@@ -39,7 +52,6 @@ public class DataAreaController {
 			setControlsDisabledState();
 		}
 	}
-	
 	
 	protected void setControlsDisabledState() {
 		this.dataArea.getSrcWord().setDisable(this.adfContext == null);
@@ -116,5 +128,98 @@ public class DataAreaController {
 		this.dataArea.getSrcWord().setText(null);
 		this.dataArea.getDestWord().setText(null);
 		//setControlsDisabledState();
+	}
+	
+	
+	// ================= sound buttons
+	
+	private void setupButtonHandlers() {
+		this.dataArea.getSrcSoundRec().setOnMousePressed(e -> {
+			onRecordingSrcPressed();
+		});
+		
+		this.dataArea.getSrcSoundRec().setOnMouseReleased(e -> {
+			onRecordingSrcReleased();
+		});
+		
+		this.dataArea.getSrcSoundPlay().setOnAction(e -> {
+			onPlaySrc();
+		});
+		
+		this.dataArea.getSrcSoundRemove().setOnAction(e -> {
+			onSoundRemoveSrc();
+		});
+		
+		// -- 
+		this.dataArea.getDestSoundRec().setOnMousePressed(e -> {
+			onRecordingDestPressed();
+		});
+		
+		this.dataArea.getDestSoundRec().setOnMouseReleased(e -> {
+			onRecordingDestReleased();
+		});
+		
+		this.dataArea.getDestSoundPlay().setOnAction(e -> {
+			onPlayDest();
+		});
+		
+		this.dataArea.getDestSoundRemove().setOnAction(e -> {
+			onSoundRemoveDest();
+		});
+	}
+	
+	private void onRecordingSrcPressed() {
+		this.recorder.start();
+	}
+	
+	private void onRecordingSrcReleased() {
+		this.recorder.stop();
+		this.srcSoundBuffer = this.recorder.getRecordedData();
+		
+		setControlsDisabledState();
+	}
+	
+	private void onPlaySrc() {
+		if (this.srcSoundBuffer == null) {
+			System.out.println("No data to play!");
+		} else if (this.player.isActive()) {
+			System.out.println("Already playing!");
+		} else {
+			this.player.play(this.srcSoundBuffer);
+		}
+	}
+	
+	private void onSoundRemoveSrc() {
+		this.srcSoundBuffer = null;
+		
+		setControlsDisabledState();
+	}
+	
+	
+	private void onRecordingDestPressed() {
+		this.recorder.start();
+	}
+	
+	private void onRecordingDestReleased() {
+		this.recorder.stop();
+		this.destSoundBuffer = this.recorder.getRecordedData();
+		
+		setControlsDisabledState();
+	}
+	
+	private void onPlayDest() {
+		if (this.destSoundBuffer == null) {
+			System.out.println("No data to play!");
+		} else if (this.player.isActive()) {
+			System.out.println("Already playing!");
+		} else {
+			this.player.play(this.destSoundBuffer);
+		}
+	}
+	
+	private void onSoundRemoveDest() {
+		this.destSoundBuffer = null;
+		
+		setControlsDisabledState();
 	}
 }

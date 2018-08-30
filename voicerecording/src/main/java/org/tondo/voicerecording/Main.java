@@ -124,7 +124,7 @@ public class Main extends Application{
 			
 			
 			this.controller.setEditState(EditingState.NEW);
-			this.dataAreaCtr.setLanguages(adf.getHeader().getSrcLoc(), adf.getHeader().getDestLoc());
+			this.dataAreaCtr.init(adf.getHeader());
 			this.dataAreaCtr.setAdfContext(entry);
 			this.dataAreaCtr.setEditable(true);
 		} else {
@@ -185,6 +185,8 @@ public class Main extends Application{
 		AdfFile loadedAdf = this.controller.getAdfFile();
 		if (loadedAdf != null) {
 			this.listController.setEntries(loadedAdf.getEntries());
+			this.controller.setEditState(EditingState.BROWSE);
+			this.dataAreaCtr.init(loadedAdf.getHeader());
 		}
 		
 		refreshToolbarState();
