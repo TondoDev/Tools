@@ -59,6 +59,8 @@ public class AdfPropertiesDialog extends Dialog<AdfHeader> {
 		
 		this.srcLang = new TextField();
 		this.destLang = new TextField();
+		this.srcLang.setText("SK");
+		this.destLang.setText("DE");
 		
 		grid.setHgap(7);
 		grid.setVgap(4);

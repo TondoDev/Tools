@@ -31,9 +31,11 @@ public class Main extends Application{
 	private Button tbLoad;
 	private Button tbSave;
 	private Button tbNew;
+	private Button tbExport;
 	private Button tbNewEntry;
 	private Button tbEditEntry;
 	private Button tbDeleteEntry;
+	
 	
 	private AdfListView adfListEntries;
 	private ListController listController;
@@ -86,25 +88,23 @@ public class Main extends Application{
 		this.tbNew = new Button("NEW");
 		this.tbLoad = new Button("LOAD");
 		this.tbSave = new Button("SAVE");
+		this.tbExport = new Button("EXPORT");
 		this.tbNewEntry = new Button("New Entry");
 		this.tbEditEntry = new Button("Edit entry");
 		this.tbDeleteEntry = new Button("Delete");
-		Button tbTest = new Button("Test");
-		toolbar.getItems().addAll(tbTest, this.tbNew, this.tbLoad, this.tbSave, new Separator(), this.tbNewEntry, this.tbEditEntry, this.tbDeleteEntry);
+		toolbar.getItems().addAll(this.tbNew, this.tbLoad, this.tbSave, this.tbExport, new Separator(), this.tbNewEntry, this.tbEditEntry, this.tbDeleteEntry);
 		
 		this.tbNew.setOnAction(e -> onButtonNewAdf());
 		this.tbLoad.setOnAction(e -> onButtonLoadAdf());
 		this.tbSave.setOnAction(e -> onButtonSaveAdf());
+		this.tbExport.setOnAction(e -> onButtonExportAdf());
 		this.tbNewEntry.setOnAction(e -> onNewEntry());
 		this.tbEditEntry.setOnAction(e -> onEditEntry());
 		this.tbDeleteEntry.setOnAction(e -> onDeleteEntry());
-		tbTest.setOnAction(e -> {
-			this.fileDialog.newAdfDialog(this.controller);
-		});
+	
 		
 		return toolbar;
 	}
-	
 	
 	// ============ TOOLBAR HANDLERS
 	/**
@@ -152,6 +152,10 @@ public class Main extends Application{
 		this.controller.setEditState(EditingState.NEW);
 		
 		refreshToolbarState();
+	}
+	
+	private void onButtonExportAdf() {
+		this.fileDialog.exportAdfDialog(this.controller);
 	}
 	
 	private void onEditEntry() {
@@ -202,6 +206,7 @@ public class Main extends Application{
 		this.tbNew.setDisable(isEditing);
 		this.tbLoad.setDisable(isEditing);
 		this.tbSave.setDisable(!hasAdf || isEditing);
+		this.tbExport.setDisable(!hasAdf || isEditing);
 		this.tbNewEntry.setDisable(!hasAdf || isEditing);
 		this.tbEditEntry.setDisable(isEditing || !hasSelected);
 		this.tbDeleteEntry.setDisable(isEditing || !hasSelected);

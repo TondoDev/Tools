@@ -6,7 +6,11 @@ import java.util.Optional;
 
 import org.tondo.voicerecording.adf.AdfFile;
 import org.tondo.voicerecording.adf.AdfHeader;
+import org.tondo.voicerecording.audio.AdfStreamer;
+import org.tondo.voicerecording.audio.FfmpegMp3Convertor;
 import org.tondo.voicerecording.ui.AdfPropertiesDialog;
+import org.tondo.voicerecording.ui.ExportConfiguration;
+import org.tondo.voicerecording.ui.ExportDialog;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -22,6 +26,8 @@ import javafx.stage.Stage;
  */
 public class AdfFileDialogsController {
 	private AdfFileAccessFacade fileAccess = new AdfFileAccessFacade();
+	private ExportDialog exportDialog;
+	private FfmpegMp3Convertor convertor = new FfmpegMp3Convertor("bin/ffmpeg/bin/ffmpeg.exe");
 	
 	
 	public static enum DialogResult {
@@ -105,6 +111,22 @@ public class AdfFileDialogsController {
 		return loadByDialog(context) ? DialogResult.OK : DialogResult.CANCEL;
 	}
 	
+	public DialogResult exportAdfDialog(MainContext context) {
+		
+		Optional<ExportConfiguration> exportConfig = getExportDialog().showAndWait(context.getAdfFile());
+		if (!exportConfig.isPresent()) {
+			System.out.println("EXPORT NO");
+			return DialogResult.CANCEL;
+		}
+		
+		ExportConfiguration conf = exportConfig.get();
+		AdfStreamer streamer = new AdfStreamer(context.getAdfFile().getHeader().getAudioFormat());
+		streamer.initPlayback(conf.getPlaySequence(), conf.getEntries());
+		
+		this.convertor.convert(streamer, exportConfig.get().getOutFile().toString());
+		return DialogResult.OK;
+	}
+	
 	
 	private boolean saveByDialog(MainContext context) {
 		FileChooser fileChooser = new FileChooser();
@@ -139,6 +161,14 @@ public class AdfFileDialogsController {
 		context.setFileLocation(pathToLoad);
 		
 		return true;
+	}
+	
+	private ExportDialog getExportDialog() {
+		if (this.exportDialog == null) {
+			this.exportDialog = new ExportDialog();
+		}
+		
+		return this.exportDialog;
 	}
 	
 	
