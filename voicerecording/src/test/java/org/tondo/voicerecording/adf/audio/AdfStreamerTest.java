@@ -1,18 +1,27 @@
 package org.tondo.voicerecording.adf.audio;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.LineUnavailableException;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.tondo.voicerecording.Voicerecording;
 import org.tondo.voicerecording.adf.AdfEntry;
+import org.tondo.voicerecording.adf.AdfFile;
+import org.tondo.voicerecording.adf.AdfHeader;
+import org.tondo.voicerecording.adf.io.AdfReader;
 import org.tondo.voicerecording.audio.AdfStreamer;
-import org.tondo.voicerecording.audio.SilenceGenerator;
 import org.tondo.voicerecording.audio.AdfStreamer.Sequence;
+import org.tondo.voicerecording.audio.SilenceGenerator;
+import org.tondo.voicerecording.audio.SoundPlayer;
 
 public class AdfStreamerTest {
 	
@@ -163,6 +172,61 @@ public class AdfStreamerTest {
 		Assert.assertEquals("Everything is readed in one step", src.length + dest.length, len);
 		Assert.assertArrayEquals("data content is OK", expected.toByteArray(), Arrays.copyOf(buff, len));
 		Assert.assertEquals("Subsequent stream attemtp returns end of stream", -1, streamer.stream(buff));
+	}
+	
+	
+	@Test
+	public void testPlaybackMoreEntries() throws LineUnavailableException, IOException, InterruptedException {
+		AdfReader reader = new AdfReader();
+		AdfFile file = null;
+		try (InputStream stream = new FileInputStream("outputs/test.adf")) {
+			file = reader.read(stream);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		Assert.assertNotNull("2rror reading file", file);
+		AudioFormat loadedFormat =  file.getHeader().getAudioFormat();
+		AdfStreamer streamer = new AdfStreamer(loadedFormat);
+		// TODO read from GUI 
+				Sequence sequence = AdfStreamer.createSequence()
+						.destination()
+						.silence(352)
+						.source()
+						.silence(350)
+						.destination()
+						.silence(400); // problem robi so 700?
+		
+//		Sequence sequence = AdfStreamer.createSequence()
+//				.destination()
+//				.silence(700)
+//				.source();
+		
+				
+		streamer.initPlayback(sequence, file.getEntries().stream().limit(1).collect(Collectors.toList()));
+		SoundPlayer player = new SoundPlayer(loadedFormat);
+		//player.play(streamer);
+		player.play(streamer);
+		System.out.println("OK");
+		Thread.sleep(7000);
+	}
+	
+	
+	private void modifySilence(byte[] data) {
+		
+		int value = 0;
+		int dir = 1;
+		
+		int len = data.length;
+		for (int i = 0; i < len; i++) {
+			if (value >= 127 || value <= -128) {
+				dir *= -1;
+			}
+			
+			value += dir;
+			data[i] = (byte) value;
+		}
+		
 	}
 	
 

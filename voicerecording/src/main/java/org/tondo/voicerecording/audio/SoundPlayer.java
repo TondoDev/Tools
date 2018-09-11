@@ -31,7 +31,6 @@ public class SoundPlayer {
 				}
 			});
 			this.clip.start();
-			System.out.println("==");
 			this.clip.drain();
 		} catch (LineUnavailableException e) {
 			e.printStackTrace();

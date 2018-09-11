@@ -12,7 +12,10 @@ public class SilenceGenerator {
 
 	public byte[] generateSilence (int milis)  {
 		double multiplier = milis/1000.0;
-		int size = (int)(format.getFrameSize() * format.getFrameRate() * multiplier);
-		return new byte[size];
+		final int FS = format.getFrameSize();
+		int size = (int)(FS * format.getFrameRate() * multiplier);
+		int reminder = size % FS;
+		int alignment = reminder == 0 ? 0 : (FS - reminder);
+		return new byte[size + alignment];
 	}
 }
