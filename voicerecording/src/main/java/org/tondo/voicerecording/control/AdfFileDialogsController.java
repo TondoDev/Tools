@@ -186,4 +186,23 @@ public class AdfFileDialogsController {
 		alert.setContentText(text);
 		return alert.showAndWait().get().getButtonData();
 	}
+	
+	/**
+	 * 
+	 * @param context
+	 * @return <code>true</code> if application should be closed
+	 */
+	public boolean closeApplication(MainContext context) {
+		if (context.getAdfFile() != null) {
+			ButtonData saveQuestioResult = showYesNoCancel("You have an opened document. Save it?");
+			if (saveQuestioResult == ButtonData.CANCEL_CLOSE) {
+				return false;
+			} else if (saveQuestioResult == ButtonData.YES) {
+				if (saveAdfDialog(context) == DialogResult.CANCEL) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 }

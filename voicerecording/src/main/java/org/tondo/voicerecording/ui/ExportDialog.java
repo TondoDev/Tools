@@ -29,12 +29,15 @@ public class ExportDialog extends Dialog<ExportConfiguration> {
 	
 	public ExportDialog() {
 		this.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-		this.setHeaderText("Export ADF");
+		this.setHeaderText("Export to MP3");
 		
 		
 		((Button) this.getDialogPane().lookupButton(ButtonType.OK)).addEventFilter(ActionEvent.ACTION, event -> {
 
-			File fileToSave = new FileChooser().showSaveDialog(getOwner());
+			FileChooser selectFileDialog =  new FileChooser();
+			selectFileDialog.setTitle("Choose target file");
+			selectFileDialog.getExtensionFilters().add(new FileChooser.ExtensionFilter("MP3 files", "*.mp3"));
+			File fileToSave = selectFileDialog.showSaveDialog(getOwner());
 			if (fileToSave == null) {
 				event.consume();
 			} else {
@@ -42,7 +45,7 @@ public class ExportDialog extends Dialog<ExportConfiguration> {
 			}
 		});
 		
-		
+			
 		this.setResultConverter(btn -> {
 			if (ButtonType.OK.equals(btn)) {
 				return buildResult();

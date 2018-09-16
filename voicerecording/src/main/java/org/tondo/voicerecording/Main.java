@@ -17,10 +17,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Separator;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 public class Main extends Application{
 	
@@ -80,6 +82,9 @@ public class Main extends Application{
 		
 		primaryStage.setScene(new Scene(layout));
 		primaryStage.show();
+		primaryStage.setOnCloseRequest(e -> {
+			onMainWindowClosing(e);
+		});
 	}
 	
 	private ToolBar createToolbar() {
@@ -249,5 +254,11 @@ public class Main extends Application{
 	private void onListSelectedItemChanged(AdfEntry newValue) {
 		this.dataAreaCtr.setAdfContext(newValue);
 		refreshToolbarState();
+	}
+	
+	private void onMainWindowClosing(WindowEvent e) {
+		if(!this.fileDialog.closeApplication(this.controller)) {
+			e.consume();
+		}
 	}
 }
