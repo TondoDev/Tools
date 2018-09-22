@@ -40,6 +40,7 @@ public class AdfFileDialogsController {
 	
 	
 	private Stage stage;
+	//private AppSettings settings;
 	
 	public AdfFileDialogsController(Stage stage) {
 		this.stage = stage;
@@ -113,7 +114,7 @@ public class AdfFileDialogsController {
 	
 	public DialogResult exportAdfDialog(MainContext context) {
 		
-		Optional<ExportConfiguration> exportConfig = getExportDialog().showAndWait(context.getAdfFile());
+		Optional<ExportConfiguration> exportConfig = getExportDialog().showAndWait(context);
 		if (!exportConfig.isPresent()) {
 			System.out.println("EXPORT NO");
 			return DialogResult.CANCEL;
@@ -123,7 +124,9 @@ public class AdfFileDialogsController {
 		AdfStreamer streamer = new AdfStreamer(context.getAdfFile().getHeader().getAudioFormat());
 		streamer.initPlayback(conf.getPlaySequence(), conf.getEntries());
 		
-		this.convertor.convert(streamer, exportConfig.get().getOutFile().toString());
+		Path outFile =  exportConfig.get().getOutFile();
+		this.convertor.convert(streamer, outFile.toString());
+		context.getSettings().setExportLocation(outFile.getParent().toString());
 		return DialogResult.OK;
 	}
 	
@@ -132,6 +135,9 @@ public class AdfFileDialogsController {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Save ADF");
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Adf files", "*.adf"));
+		if (context.getSettings().getAdfLocation() != null) {
+			fileChooser.setInitialDirectory(new File(context.getSettings().getAdfLocation()));
+		}
 		File fileToSave = fileChooser.showSaveDialog(this.stage);
 
 		if (fileToSave == null) {
@@ -141,6 +147,7 @@ public class AdfFileDialogsController {
 		Path pathToSave = fileToSave.toPath();
 		this.fileAccess.saveAdf(context.getAdfFile(), pathToSave);
 		context.setFileLocation(pathToSave);
+		context.getSettings().setAdfLocation(pathToSave.getParent().toString());
 		return true;
 	}
 	
@@ -148,6 +155,10 @@ public class AdfFileDialogsController {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Load ADF");
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Adf files", "*.adf"));
+		if (context.getSettings().getAdfLocation() != null) {
+			fileChooser.setInitialDirectory(new File(context.getSettings().getAdfLocation()));
+		}
+		
 		File fileToLoad = fileChooser.showOpenDialog(this.stage);
 		
 		if (fileToLoad == null) {
@@ -159,6 +170,7 @@ public class AdfFileDialogsController {
 		AdfFile adfFile = this.fileAccess.loadAdf(pathToLoad);
 		context.setAdfFile(adfFile);
 		context.setFileLocation(pathToLoad);
+		context.getSettings().setAdfLocation(pathToLoad.getParent().toString());
 		
 		return true;
 	}

@@ -36,7 +36,7 @@ public class Voicerecording {
 	 */
 	public static AudioFormat getAudioFormat() {
 		if (FORMAT == null) {
-			float sampleRate = 22100;
+			float sampleRate = 44200;
 			int sampleSizeInBits = 16;
 			int channels = 2;
 			boolean signed = true;

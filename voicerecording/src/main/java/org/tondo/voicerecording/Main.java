@@ -1,5 +1,8 @@
 package org.tondo.voicerecording;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.tondo.voicerecording.adf.AdfEntry;
 import org.tondo.voicerecording.adf.AdfFile;
 import org.tondo.voicerecording.control.AdfFileDialogsController;
@@ -17,7 +20,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Separator;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
@@ -45,6 +47,8 @@ public class Main extends Application{
 	private MainContext controller;
 	private AdfFileDialogsController fileDialog;
 	
+	private static final Path SETTINGS_LOC = Paths.get("settings.properties");
+	
 	public static void main(String[] args) {
 		launch(args);
 	}
@@ -54,6 +58,8 @@ public class Main extends Application{
 		this.controller = new MainContext();
 		
 		primaryStage.setTitle("Layout");
+		
+		this.controller.setSettings(AppSettings.load(SETTINGS_LOC));
 		
 		BorderPane layout = new BorderPane();
 		layout.setTop(createToolbar());
@@ -259,6 +265,12 @@ public class Main extends Application{
 	private void onMainWindowClosing(WindowEvent e) {
 		if(!this.fileDialog.closeApplication(this.controller)) {
 			e.consume();
+		} else {
+			applicationShutdownRutines();
 		}
+	}
+	
+	private void applicationShutdownRutines() {
+		AppSettings.save(SETTINGS_LOC, this.controller.getSettings());
 	}
 }
