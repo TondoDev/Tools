@@ -21,16 +21,81 @@
 	</dependencies>
 
 	<build>
-		<plugins>
+	<plugins>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-compiler-plugin</artifactId>
+			<version>3.3</version>
+			<configuration>
+				<source>1.8</source>
+				<target>1.8</target>
+			</configuration>
+		</plugin>
+		<plugin>
+			<!-- Build an executable JAR -->
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-jar-plugin</artifactId>
+			<version>3.1.1</version>
+			<configuration>
+				<archive>
+					<manifest>
+						<mainClass>org.tondo.voicerecording.Main</mainClass>
+					</manifest>
+				</archive>
+			</configuration>
+		</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.3</version>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.12.4</version>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<skipTests>true</skipTests>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
+	
+	<profiles>
+		<profile>
+			<id>copy-app</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>copy-app</id>
+								<phase>install</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<overwrite>true</overwrite>
+									<outputDirectory>C:\MyUtils\adf\</outputDirectory>
+									<resources>
+										<resource>
+											<directory>target</directory>
+											<filtering>false</filtering>
+											<includes>
+												<include>voicerecording-${project.version}.jar</include>
+											</includes>
+										</resource>
+										<resource>
+											<directory>.</directory>
+											<filtering>false</filtering>
+											<includes>
+												<include>bin/ffmpeg/</include>
+											</includes>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+	
 </project>
