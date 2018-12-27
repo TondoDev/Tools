@@ -4,6 +4,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
@@ -41,6 +42,10 @@ public class DataArea extends VBox {
 		HBox srcHbox = new HBox();
 		srcHbox.setSpacing(10);
 		srcHbox.setPadding(new Insets(5));
+		
+		this.srcLabel.setMinWidth(Control.USE_PREF_SIZE);
+		HBox.setHgrow(this.srcWord, Priority.ALWAYS);
+		
 		srcHbox.getChildren().addAll(this.srcLabel, this.srcWord, this.srcSoundRec, this.srcSoundPlay, this.srcSoundRemove);
 		srcHbox.setAlignment(Pos.CENTER_LEFT);
 		
@@ -56,6 +61,9 @@ public class DataArea extends VBox {
 		destHbox.setPadding(new Insets(5));
 		destHbox.setAlignment(Pos.CENTER_LEFT);
 
+		this.destlabel.setMinWidth(Control.USE_PREF_SIZE);
+		HBox.setHgrow(this.destWord, Priority.ALWAYS);
+		
 		destHbox.getChildren().addAll(this.destlabel, this.destWord,  this.destSoundRec, this.destSoundPlay, this.destSoundRemove);
 		
 		this.specialCharsHBox = new HBox();
@@ -82,6 +90,7 @@ public class DataArea extends VBox {
 		VBox.setVgrow(confirmBox, Priority.ALWAYS);
 		confirmBox.getChildren().addAll(this.ok, this.cancel);
 		
+		this.setMinWidth(Control.USE_PREF_SIZE);
 		this.setSpacing(4);
 		this.getChildren().addAll(srcHbox, destHbox, specialCharsHBox, confirmBox);
 	}
