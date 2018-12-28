@@ -60,11 +60,12 @@ public class AdfFileDialogsController {
 			}
 		}
 		
+		context.setAdfFile(null);
+		context.setFileLocation(null);
+		
 		Optional<AdfHeader> headerForNewAdf = new AdfPropertiesDialog().showAndWait();
 		if (!headerForNewAdf.isPresent()) {
 			System.out.println("== SAVE WITHOUT CREATE");
-			context.setAdfFile(null);
-			context.setFileLocation(null);
 			return DialogResult.NOT_COMPLETED;
 		}
 

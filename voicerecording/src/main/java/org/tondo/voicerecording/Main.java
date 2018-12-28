@@ -28,6 +28,7 @@ import javafx.stage.WindowEvent;
 
 public class Main extends Application{
 	
+	private Stage mainStage;
 	private DataArea dataArea;
 	private DataAreaController dataAreaCtr;
 	
@@ -57,8 +58,8 @@ public class Main extends Application{
 	public void start(Stage primaryStage) throws Exception {
 		this.controller = new MainContext();
 		
-		primaryStage.setTitle("Layout");
-		
+		primaryStage.setTitle("Nothing loaded");
+		this.mainStage = primaryStage;
 		this.controller.setSettings(AppSettings.load(SETTINGS_LOC));
 		
 		BorderPane layout = new BorderPane();
@@ -145,6 +146,7 @@ public class Main extends Application{
 			this.dataAreaCtr.setEditable(false);
 		}
 		
+		updateWindowTitle();
 		refreshToolbarState();
 	}
 	
@@ -192,9 +194,11 @@ public class Main extends Application{
 	
 	private void onButtonSaveAdf() {
 		this.fileDialog.saveAdfDialog(this.controller);
+		
+		updateWindowTitle();
 	}
 	
-	public void onButtonLoadAdf() {
+	private void onButtonLoadAdf() {
 		this.fileDialog.loadAdfDialog(this.controller);
 		
 		AdfFile loadedAdf = this.controller.getAdfFile();
@@ -204,6 +208,7 @@ public class Main extends Application{
 			this.dataAreaCtr.init(loadedAdf.getHeader());
 		}
 		
+		updateWindowTitle();
 		refreshToolbarState();
 	}
 	
@@ -272,5 +277,16 @@ public class Main extends Application{
 	
 	private void applicationShutdownRutines() {
 		AppSettings.save(SETTINGS_LOC, this.controller.getSettings());
+	}
+	
+	private void updateWindowTitle() {
+		Path file = this.controller.getFileLocation();
+		if (file != null) {
+			this.mainStage.setTitle("File: " + file.getFileName());
+		} else if (this.controller.getAdfFile() != null) {
+			this.mainStage.setTitle("File: not saved");
+		} else {
+			this.mainStage.setTitle("Nothing loaded");
+		}
 	}
 }
