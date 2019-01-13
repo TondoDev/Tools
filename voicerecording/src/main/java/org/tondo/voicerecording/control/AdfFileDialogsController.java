@@ -48,7 +48,7 @@ public class AdfFileDialogsController {
 	
 	
 	public DialogResult newAdfDialog(MainContext context) {
-		if (context.getAdfFile() != null) {
+		if (context.getAdfFile() != null && context.isChanged()) {
 			ButtonData result = showYesNoCancel("You have already opened an ADF file. Save it?");
 			if (result == ButtonData.CANCEL_CLOSE) {
 				return DialogResult.CANCEL;
@@ -93,12 +93,13 @@ public class AdfFileDialogsController {
 			return DialogResult.CANCEL;
 		}
 		
+		context.markUnchanged();
 		return DialogResult.OK;
 	}
 	
 	
 	public DialogResult loadAdfDialog(MainContext context) {
-		if (context.getAdfFile() != null) {
+		if (context.getAdfFile() != null && context.isChanged()) {
 			ButtonData result = showYesNoCancel("You have already opened an ADF file. Save it?");
 			if (result == ButtonData.CANCEL_CLOSE) {
 				return DialogResult.CANCEL;
@@ -172,6 +173,7 @@ public class AdfFileDialogsController {
 		context.setAdfFile(adfFile);
 		context.setFileLocation(pathToLoad);
 		context.getSettings().setAdfLocation(pathToLoad.getParent().toString());
+		context.markUnchanged();
 		
 		return true;
 	}
@@ -206,7 +208,7 @@ public class AdfFileDialogsController {
 	 * @return <code>true</code> if application should be closed
 	 */
 	public boolean closeApplication(MainContext context) {
-		if (context.getAdfFile() != null) {
+		if (context.getAdfFile() != null && context.isChanged()) {
 			ButtonData saveQuestioResult = showYesNoCancel("You have an opened document. Save it?");
 			if (saveQuestioResult == ButtonData.CANCEL_CLOSE) {
 				return false;

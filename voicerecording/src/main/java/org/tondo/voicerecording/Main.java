@@ -188,7 +188,9 @@ public class Main extends Application{
 	
 	private void onDeleteEntry() {
 		if (this.controller.getEditState() == EditingState.BROWSE) {
-			this.listController.removeSelected();
+			if (this.listController.removeSelected()) {
+				this.controller.markChanged();
+			}
 		}
 	}
 	
@@ -254,6 +256,7 @@ public class Main extends Application{
 			this.listController.updateEntry(entry);
 		}
 		this.controller.setEditState(EditingState.BROWSE);
+		this.controller.markChanged();
 		refreshToolbarState();
 	}
 	

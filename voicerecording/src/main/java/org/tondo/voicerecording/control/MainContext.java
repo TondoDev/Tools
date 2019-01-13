@@ -18,6 +18,7 @@ public class MainContext {
 	private EditingState editState;
 	private Path fileLocation;
 	private AppSettings settings;
+	private boolean changedFlag;
 	
 	public AdfFile createNewAdfFile () {
 		AdfHeader header = new AdfHeader();
@@ -29,6 +30,7 @@ public class MainContext {
 	
 	public AdfFile createNewAdfFile(AdfHeader header) {
 		this.currentAdfFile = new AdfFile(header);
+		this.changedFlag = true;
 		return this.currentAdfFile;
 	}
 	
@@ -62,5 +64,17 @@ public class MainContext {
 	
 	public void setSettings(AppSettings settings) {
 		this.settings = settings;
+	}
+	
+	public boolean isChanged() {
+		return this.changedFlag;
+	}
+	
+	public void markChanged() {
+		this.changedFlag = true;
+	}
+	
+	public void markUnchanged() {
+		this.changedFlag = false;
 	}
 }
