@@ -80,7 +80,7 @@ public class Main extends Application{
 				
 			}
 		});
-		this.listController = new ListController(this.adfListEntries);
+		this.listController = new ListController(this.adfListEntries, this.controller);
 		this.fileDialog = new AdfFileDialogsController(primaryStage);
 		
 		// this will disable controls

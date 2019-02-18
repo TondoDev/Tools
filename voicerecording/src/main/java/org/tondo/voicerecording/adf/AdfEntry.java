@@ -49,4 +49,10 @@ public class AdfEntry {
 	public void setDestSoundRaw(byte[] destSoundRaw) {
 		this.destSoundRaw = destSoundRaw;
 	}
+	
+	@Override
+	public String toString() {
+		
+		return "[" + this.srcWord + " " +  this.destWord + "]";
+	}
 }

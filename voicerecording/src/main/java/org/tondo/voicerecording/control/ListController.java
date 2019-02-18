@@ -6,6 +6,7 @@ import org.tondo.voicerecording.adf.AdfEntry;
 import org.tondo.voicerecording.ui.AdfListView;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 
 /**
@@ -17,9 +18,11 @@ public class ListController {
 	
 	private ObservableList<AdfEntry> entries;
 	private AdfListView listView;
+	private MainContext context;
 	
-	public ListController (AdfListView listView) {
+	public ListController (AdfListView listView, MainContext context) {
 		this.listView = listView;
+		this.context = context;
 	}
 	
 	public void setEntries(List<AdfEntry> entries) {
@@ -27,6 +30,7 @@ public class ListController {
 		if (entries != null) {
 			this.entries = FXCollections.observableList(entries);
 			this.listView.setItems(this.entries);
+			this.entries.addListener((ListChangeListener<? super AdfEntry>) e -> this.context.markChanged());
 		} else {
 			this.entries = null;
 		}
