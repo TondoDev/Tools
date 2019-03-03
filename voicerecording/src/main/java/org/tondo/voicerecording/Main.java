@@ -128,16 +128,9 @@ public class Main extends Application{
 		if (adf != null) {
 			this.listController.setEntries(adf.getEntries());
 
-			// TODO remove after tests
-			AdfEntry entry = new AdfEntry();
-			entry.setSrcWord("spinas");
-			entry.setDestWord("kkt");
-			entry.setDestSoundRaw(new byte[5]);
-			
-			
 			this.controller.setEditState(EditingState.NEW);
 			this.dataAreaCtr.init(adf.getHeader());
-			this.dataAreaCtr.setAdfContext(entry);
+			this.dataAreaCtr.setAdfContext(new AdfEntry());
 			this.dataAreaCtr.setEditable(true);
 		} else {
 			this.listController.setEntries(null);
@@ -208,7 +201,9 @@ public class Main extends Application{
 			this.listController.setEntries(loadedAdf.getEntries());
 			this.controller.setEditState(EditingState.BROWSE);
 			this.dataAreaCtr.init(loadedAdf.getHeader());
+			this.controller.markUnchanged();
 		}
+		
 		
 		updateWindowTitle();
 		refreshToolbarState();

@@ -21,9 +21,7 @@ public class AdfListView extends ListView<AdfEntry> {
 		
 		private static final String DND_COLOR = "-fx-background-color: rgb(153, 187, 255)";
 		public AdfCell() {
-			
 			setOnDragDetected(e -> {
-				
 				// don't start for empty cells
 				if (getItem() == null) {
 					return;
@@ -54,6 +52,7 @@ public class AdfListView extends ListView<AdfEntry> {
 				if (current <= size) {
 					this.setStyle(DND_COLOR);
 				}
+			
 				e.consume();
 			});
 			
@@ -64,6 +63,8 @@ public class AdfListView extends ListView<AdfEntry> {
 				this.setStyle("");
 				e.consume();
 			});
+			
+			
 			
 			// this is called after DragDropped
 			setOnDragDone(e -> {
