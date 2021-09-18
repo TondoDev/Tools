@@ -3,15 +3,22 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.tondo.voice</groupId>
 	<artifactId>voicerecording</artifactId>
-	<version>0.1.1-SNAPSHOT</version>
+	<version>0.2.0-SNAPSHOT</version>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
+		<javafx.version>16</javafx.version>
+		<javafx.maven.plugin.version>0.0.6</javafx.maven.plugin.version>
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-controls</artifactId>
+			<version>${javafx.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -21,29 +28,52 @@
 	</dependencies>
 
 	<build>
-	<plugins>
-		<plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-compiler-plugin</artifactId>
-			<version>3.3</version>
-			<configuration>
-				<source>1.8</source>
-				<target>1.8</target>
-			</configuration>
-		</plugin>
-		<plugin>
-			<!-- Build an executable JAR -->
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-jar-plugin</artifactId>
-			<version>3.1.1</version>
-			<configuration>
-				<archive>
-					<manifest>
-						<mainClass>org.tondo.voicerecording.Main</mainClass>
-					</manifest>
-				</archive>
-			</configuration>
-		</plugin>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.3</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<!-- Build an executable JAR 
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.1.1</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>org.tondo.voicerecording.Main</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin> -->
+			<plugin>
+        		<groupId>org.openjfx</groupId>
+        		<artifactId>javafx-maven-plugin</artifactId>
+        		<version>${javafx.maven.plugin.version}</version>
+        		<executions>
+                	<execution>
+                    	<id>run</id>
+                    		<configuration>
+                        		<mainClass>org.tondo.voicerecording.Main</mainClass>
+                    		</configuration>
+                	</execution>
+                	<!-- To allow remote debugging of this JavaFX application. Goal with ID is executed like javafx:run@debug -->
+                	<execution>
+                    	<id>debug</id>
+                    	<configuration>
+                        	<mainClass>org.tondo.voicerecording.Main</mainClass>
+                        		<options>
+                            		<option>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000</option>
+                        		</options>
+						</configuration>
+                	</execution>
+            	</executions>
+      		</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
