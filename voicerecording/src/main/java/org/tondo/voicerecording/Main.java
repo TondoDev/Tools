@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import org.tondo.voicerecording.adf.AdfEntry;
 import org.tondo.voicerecording.adf.AdfFile;
 import org.tondo.voicerecording.control.AdfFileDialogsController;
+import org.tondo.voicerecording.control.AdfFileDialogsController.DialogResult;
 import org.tondo.voicerecording.control.DataAreaController;
 import org.tondo.voicerecording.control.EditingState;
 import org.tondo.voicerecording.control.ListController;
@@ -123,20 +124,26 @@ public class Main extends Application{
 	 * Creates new ADF file structure and begin edit of first ADF entry
 	 */
 	private void onButtonNewAdf() {
-		this.fileDialog.newAdfDialog(this.controller);
-		AdfFile adf = this.controller.getAdfFile();
-		if (adf != null) {
-			this.listController.setEntries(adf.getEntries());
+		DialogResult newAdfResult = this.fileDialog.newAdfDialog(this.controller);
+		
+		if (newAdfResult != DialogResult.CANCEL) {
+			
+			AdfFile adf = this.controller.getAdfFile();
+			
+			if (adf != null) {
+				this.listController.setEntries(adf.getEntries());
 
-			this.controller.setEditState(EditingState.NEW);
-			this.dataAreaCtr.init(adf.getHeader());
-			this.dataAreaCtr.setAdfContext(new AdfEntry());
-			this.dataAreaCtr.setEditable(true);
-		} else {
-			this.listController.setEntries(null);
-			this.controller.setEditState(null);
-			this.dataAreaCtr.setAdfContext(null);
-			this.dataAreaCtr.setEditable(false);
+				this.controller.setEditState(EditingState.NEW);
+				this.dataAreaCtr.init(adf.getHeader());
+				this.dataAreaCtr.setAdfContext(new AdfEntry());
+				this.dataAreaCtr.setEditable(true);
+			} else {
+				// for cases when user cancels dialog with new ADF settings
+				this.listController.setEntries(null);
+				this.controller.setEditState(null);
+				this.dataAreaCtr.setAdfContext(null);
+				this.dataAreaCtr.setEditable(false);
+			}
 		}
 		
 		updateWindowTitle();
@@ -194,16 +201,17 @@ public class Main extends Application{
 	}
 	
 	private void onButtonLoadAdf() {
-		this.fileDialog.loadAdfDialog(this.controller);
+		DialogResult dialogResult = this.fileDialog.loadAdfDialog(this.controller);
 		
-		AdfFile loadedAdf = this.controller.getAdfFile();
-		if (loadedAdf != null) {
-			this.listController.setEntries(loadedAdf.getEntries());
-			this.controller.setEditState(EditingState.BROWSE);
-			this.dataAreaCtr.init(loadedAdf.getHeader());
-			this.controller.markUnchanged();
+		if (dialogResult != DialogResult.CANCEL) {
+			AdfFile loadedAdf = this.controller.getAdfFile();
+			if (loadedAdf != null) {
+				this.listController.setEntries(loadedAdf.getEntries());
+				this.controller.setEditState(EditingState.BROWSE);
+				this.dataAreaCtr.init(loadedAdf.getHeader());
+				this.controller.markUnchanged();
+			}
 		}
-		
 		
 		updateWindowTitle();
 		refreshToolbarState();
