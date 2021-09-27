@@ -130,6 +130,9 @@ public class DataAreaController {
 		//setControlsDisabledState();
 	}
 	
+	public SoundPlayer getSoundPlayer() {
+		return this.player;
+	}
 	
 	// ================= sound buttons
 	

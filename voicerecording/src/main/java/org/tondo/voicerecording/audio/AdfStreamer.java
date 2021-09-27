@@ -45,6 +45,7 @@ public class AdfStreamer {
 	private List<AdfEntry> entries;
 	private AdfEntry context;
 	private AudioFormat format;
+	private boolean inLoop;
 	
 	public AdfStreamer(AudioFormat format) {
 		this.format = format;
@@ -74,6 +75,38 @@ public class AdfStreamer {
 		this.entryIter = this.entries.iterator();
 		
 		this.prepareCommands(sequence);
+	}
+	
+	public void initPlayback(Sequence sequence, List<AdfEntry> entries, boolean loop, AdfEntry initialEntry ) {
+		
+		this.context = null;
+		this.processedBuffer = null;
+		this.processedBufferOffset = -1;
+		
+		this.entries = entries;
+		this.entryIter = initIterator(entries, initialEntry);
+		
+		this.inLoop = loop;
+		
+		this.prepareCommands(sequence);
+	}
+	
+	private Iterator<AdfEntry> initIterator(List<AdfEntry> entries, AdfEntry initialEntry) {
+		Iterator<AdfEntry> iter = entries.iterator();
+		if (initialEntry == null) {
+			return iter;
+		}
+		
+		// initial entry is expected from the list, so checking references is OK
+		while (iter.hasNext()) {
+			if (initialEntry != iter.next()) {
+				return iter;
+			}
+		}
+
+		// we didn't find entry in list, so be ginning is returned
+		// but this case should never happen
+		return  entries.iterator();
 	}
 	
 	
@@ -126,7 +159,11 @@ public class AdfStreamer {
 			} else if (entryIter.hasNext()) {
 				this.context = entryIter.next();
 				this.commandIter = this.commands.iterator();
-			} else {
+			} else if (this.inLoop) {
+				this.commandIter = this.commands.iterator();
+				this.entryIter = this.entries.iterator();
+			}
+			else {
 				// end of stream no other data available
 				return currentLen > 0 ? currentLen : -1;
 			}

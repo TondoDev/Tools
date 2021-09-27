@@ -1,10 +1,5 @@
 package org.tondo.voicerecording.audio;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -16,6 +11,8 @@ public class SoundPlayer {
 	private AudioFormat audioFormat;
 	private Clip clip;
 
+	private volatile boolean playing;
+	
 	public SoundPlayer(AudioFormat audioFormat) {
 		this.audioFormat = audioFormat;
 	}
@@ -46,28 +43,21 @@ public class SoundPlayer {
 			output.open(dataFormat);
 			output.start();
 			
-			
-			try (OutputStream file = new FileOutputStream("outputs/slovicko.raw")) {
-				byte[] buff = new byte[dataFormat.getFrameSize() * 1000];
-				int len;
-				while ((len = streamer.stream(buff)) > -1) {
-					output.write(buff, 0, len);
-					file.write(buff, 0, len);
-				}
-
-				output.drain();
-				output.stop();
-
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			playing = true;
+			byte[] buff = new byte[dataFormat.getFrameSize() * 1000];
+			int len;
+			while ((len = streamer.stream(buff)) > -1 && this.playing) {
+				output.write(buff, 0, len);
 			}
+
+			output.drain();
+			output.stop();
 		}
-		
-		
+	}
+	
+	// dont case about thread safety
+	public void stopPlayback() {
+		this.playing = false;
 	}
 	
 	public boolean isActive() {

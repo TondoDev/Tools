@@ -10,6 +10,7 @@ import org.tondo.voicerecording.control.AdfFileDialogsController.DialogResult;
 import org.tondo.voicerecording.control.DataAreaController;
 import org.tondo.voicerecording.control.EditingState;
 import org.tondo.voicerecording.control.ListController;
+import org.tondo.voicerecording.control.ListPlayer;
 import org.tondo.voicerecording.control.MainContext;
 import org.tondo.voicerecording.ui.AdfListView;
 import org.tondo.voicerecording.ui.DataArea;
@@ -41,6 +42,7 @@ public class Main extends Application{
 	private Button tbNewEntry;
 	private Button tbEditEntry;
 	private Button tbDeleteEntry;
+	private Button tbPlayback;
 	
 	
 	private AdfListView adfListEntries;
@@ -105,7 +107,8 @@ public class Main extends Application{
 		this.tbNewEntry = new Button("New Entry");
 		this.tbEditEntry = new Button("Edit entry");
 		this.tbDeleteEntry = new Button("Delete");
-		toolbar.getItems().addAll(this.tbNew, this.tbLoad, this.tbSave, this.tbExport, new Separator(), this.tbNewEntry, this.tbEditEntry, this.tbDeleteEntry);
+		this.tbPlayback = new Button("Play");
+		toolbar.getItems().addAll(this.tbNew, this.tbLoad, this.tbSave, this.tbExport, new Separator(), this.tbNewEntry, this.tbEditEntry, this.tbDeleteEntry, this.tbPlayback);
 		
 		this.tbNew.setOnAction(e -> onButtonNewAdf());
 		this.tbLoad.setOnAction(e -> onButtonLoadAdf());
@@ -114,6 +117,7 @@ public class Main extends Application{
 		this.tbNewEntry.setOnAction(e -> onNewEntry());
 		this.tbEditEntry.setOnAction(e -> onEditEntry());
 		this.tbDeleteEntry.setOnAction(e -> onDeleteEntry());
+		this.tbPlayback.setOnAction(e -> onPlayList());
 	
 		
 		return toolbar;
@@ -194,6 +198,17 @@ public class Main extends Application{
 		}
 	}
 	
+	private void onPlayList() {
+		// this is just defense, the button should be disabled in other cases
+		if (this.controller.getEditState() != EditingState.BROWSE) {
+			return;
+		}
+		
+		ListPlayer player = new ListPlayer(controller, this.dataAreaCtr.getSoundPlayer(), 0);
+		player.play();
+		
+	}
+	
 	private void onButtonSaveAdf() {
 		this.fileDialog.saveAdfDialog(this.controller);
 		
@@ -231,6 +246,7 @@ public class Main extends Application{
 		this.tbNewEntry.setDisable(!hasAdf || isEditing);
 		this.tbEditEntry.setDisable(isEditing || !hasSelected);
 		this.tbDeleteEntry.setDisable(isEditing || !hasSelected);
+		this.tbPlayback.setDisable(!hasAdf || isEditing || this.listController.isListEmpty());
 	}
 	
 	

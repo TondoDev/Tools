@@ -71,6 +71,10 @@ public class ListController {
 		return false;
 	}
 	
+	public boolean isListEmpty() {
+		return this.entries == null || this.entries.isEmpty();
+	}
+	
 	private int findEntry(AdfEntry entry) {
 		int len = this.entries.size();
 		for (int i = 0; i < len; i++) {
