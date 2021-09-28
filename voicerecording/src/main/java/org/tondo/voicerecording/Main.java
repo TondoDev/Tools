@@ -204,7 +204,10 @@ public class Main extends Application{
 			return;
 		}
 		
-		ListPlayer player = new ListPlayer(controller, this.dataAreaCtr.getSoundPlayer(), 0);
+		int index = this.listController.getSelectedIndex();
+		// negatiov value means that nothing is selected, so start from the beginning
+		index = index < 0 ? 0 : index;
+		ListPlayer player = new ListPlayer(controller, this.dataAreaCtr.getSoundPlayer(), index);
 		player.play();
 		
 	}

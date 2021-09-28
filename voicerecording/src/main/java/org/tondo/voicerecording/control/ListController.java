@@ -56,6 +56,10 @@ public class ListController {
 		return this.listView.getSelectionModel().getSelectedItem();
 	}
 	
+	public int getSelectedIndex() {
+		return this.listView.getSelectionModel().getSelectedIndex();
+	}
+	
 	/**
 	 * 
 	 * @return <code>true</code> when entry was deleted, otherwise <code>false</code>

@@ -97,16 +97,26 @@ public class AdfStreamer {
 			return iter;
 		}
 		
-		// initial entry is expected from the list, so checking references is OK
-		while (iter.hasNext()) {
-			if (initialEntry != iter.next()) {
-				return iter;
+		// how many entries to skip
+		int skips = 0;
+		for (AdfEntry next : entries) {
+			// initial entry is expected from the list, so checking references is OK
+			if (next == initialEntry) {
+				break;
 			}
+			skips++;
 		}
-
-		// we didn't find entry in list, so be ginning is returned
-		// but this case should never happen
-		return  entries.iterator();
+		
+		// entries not from list (should never happen) then beginning of the list will be used 
+		if (skips == entries.size()) {
+			return iter;
+		}
+		
+		for (int i = 0; i < skips; i++) {
+			iter.next();
+		}
+		
+		return  iter;
 	}
 	
 	
@@ -160,7 +170,6 @@ public class AdfStreamer {
 				this.context = entryIter.next();
 				this.commandIter = this.commands.iterator();
 			} else if (this.inLoop) {
-				this.commandIter = this.commands.iterator();
 				this.entryIter = this.entries.iterator();
 			}
 			else {
